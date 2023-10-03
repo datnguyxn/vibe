@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "359043547678",
+    "firebase_url": "https://vibe-61209-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "vibe-61209",
+    "storage_bucket": "vibe-61209.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:359043547678:android:62a19b537beb1bc874640f",
+        "android_client_info": {
+          "package_name": "com.vibe.vibe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjIyAgKtS-_C8GthBxuN7Z5G5eLWZcAII"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
