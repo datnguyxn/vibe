@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">vibe</string>
+    <string name="login">Login to Your Account</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="password">Password</string>
+    <string name="log_in">Log in</string>
+    <string name="forget_password">Forget Password?</string>
+    <string name="or_login_with">Or login with</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="continue_with_phone_number">Continue with phone number</string>
+    <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="register">Register</string>
+    <string name="create_your_account">Create your account</string>
+    <string name="user_name">User Name</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="next">Next</string>
+    <string name="verify">Verify</string>
+    <string name="enter_your_otp">Enter your OTP</string>
+    <string name="name_song">Kwaku the Traveller</string>
+    <string name="name_artist">Black Sherif</string>
 </resources>
