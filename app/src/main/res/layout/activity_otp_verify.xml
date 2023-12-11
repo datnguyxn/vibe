@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical"
+    tools:context=".authentication.OTPVerifyActivity">
+
+    <!-- TODO: Update blank fragment layout -->
+    <ImageView
+        android:id="@+id/imgBack"
+        android:layout_width="15dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_10dp"
+        android:layout_marginTop="16dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/left_arrow" />
+
+    <LinearLayout
+        android:id="@+id/ll_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_10dp"
+
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/_20dp"
+            android:text="@string/enter_your_otp_here"
+            android:textColor="#F5F5FA"
+            android:textSize="@dimen/_20sp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/_16dp"
+            android:background="@drawable/button_border_gray_flat"
+            android:paddingHorizontal="@dimen/_8dp"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtOTP"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@android:color/transparent"
+                android:hint="@string/enter_your_otp"
+                android:inputType="number"
+                android:textColor="@color/fifty_percent_black_overlay"
+                android:textColorHint="#A9B1C7"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:ignore="TouchTargetSizeCheck" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVerifyOTP"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="2dp"
+            android:backgroundTint="#E80A0A"
+            android:text="@string/send_otp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="@dimen/_1dp" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_20dp"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/dont_receive_otp"
+            android:textColor="@color/FlatWhite"
+            android:textSize="@dimen/_16sp"
+            />
+
+        <TextView
+            android:id="@+id/tvRecent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/resend_otp"
+            android:textColor="#E80A0A"
+            android:textSize="@dimen/_16sp"
+            android:textStyle="bold"
+            android:layout_marginStart="@dimen/_12dp" />
+
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/FlatWhite"
+            android:textSize="@dimen/_16sp"
+            android:textStyle="bold"
+            android:text="00:30"
+            android:layout_marginStart="@dimen/_12dp" />
+    </LinearLayout>
+
+</LinearLayout>

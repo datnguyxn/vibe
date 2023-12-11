@@ -20,4 +20,21 @@
     <string name="enter_your_otp">Enter your OTP</string>
     <string name="name_song">Kwaku the Traveller</string>
     <string name="name_artist">Black Sherif</string>
+    <string name="home">Home</string>
+    <string name="search">Search</string>
+    <string name="library">Library</string>
+    <string name="settings">Settings</string>
+    <string name="scan_album">Scan Album</string>
+    <string name="about_us">About Us</string>
+    <string name="logout">Logout</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="kwaku_the_traveller">Kwaku the Traveller</string>
+    <string name="black_sherif">Black Sherif</string>
+    <string name="_0_00">0:00</string>
+    <string name="_3_05">3:05</string>
+    <string name="enter_your_otp_here">Enter Your OTP here</string>
+    <string name="send_otp">Send OTP</string>
+    <string name="dont_receive_otp">Didn\'t receive the code?</string>
+    <string name="resend_otp">Resend OTP</string>
 </resources>

@@ -10,7 +10,7 @@
 
     <RelativeLayout
         android:id="@+id/relativeLayout"
-        android:background="@color/black"
+        android:background="#42382F"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -63,15 +63,17 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/imgUnLike"
                 android:layout_width="@dimen/_24dp"
                 android:layout_height="@dimen/_24dp"
                 android:layout_marginEnd="@dimen/_20dp"
                 android:src="@drawable/unlike"/>
 
             <ImageView
+                android:id="@+id/imgPause"
                 android:layout_width="@dimen/_24dp"
                 android:layout_height="@dimen/_24dp"
-                android:src="@drawable/pause"/>
+                android:src="@drawable/play_no_color"/>
         </LinearLayout>
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

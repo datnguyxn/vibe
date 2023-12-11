@@ -6,9 +6,34 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowTranslucentStatus">true</item>
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryVariant">@color/white</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorSecondaryVariant">@color/white</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/transitionShapeAppearance</item>
+        <!-- Customize your theme here. -->
+        <item name="iconTintColor">@color/FlatWhite</item>
+<!--        custom bottom navigation view selected-->
+        <item name="bottomNavigationStyle">@style/Widget.Vibe.BottomNavigationView</item>
     </style>
 
     <style name="Theme.Vibe" parent="Base.Theme.Vibe" />
+    <style name="Theme.Vide.BottomMenu" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+    </style>
 
     <style name="Theme.AuthScreen" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowActionBar">true</item>

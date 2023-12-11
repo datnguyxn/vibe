@@ -13,7 +13,7 @@
     <color name="SurfaceColor">#FFCC00</color>
     <color name="BackwardColorHeavy">#B0000000</color>
     <color name="backward_color">#DD000000</color>
-    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimary">#E63426</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">@color/flatOrange</color>
     <color name="Gray">#22000000</color>
@@ -26,7 +26,7 @@
     <color name="flatPurple">#5856D6</color>
     <color name="FlatPink">#FF2D55</color>
     <color name="flatBlue">#007AFF</color>
-
+    <color name="darkGray">#202020</color>
     <color name="HeavyOrange">#AF8700</color>
     <color name="HeavyRed">#770000</color>
     <color name="HeavyTealBlue">#0058AA</color>

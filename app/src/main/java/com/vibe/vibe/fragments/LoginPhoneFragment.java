@@ -2,11 +2,14 @@ package com.vibe.vibe.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.nfc.Tag;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +24,13 @@ import com.vibe.vibe.R;
  * Use the {@link LoginPhoneFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class LoginPhoneFragment extends Fragment {
+public class LoginPhoneFragment extends Fragment{
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String TAG = "LOGIN PHONE FRAGMENT";
     private TextInputEditText edtPhomeNumber;
     private MaterialButton btnNext;
     private ImageView imgBack;
@@ -85,6 +89,10 @@ public class LoginPhoneFragment extends Fragment {
         // Inflate the layout for this fragment
         View convertView = inflater.inflate(R.layout.fragment_login_phone, container, false);
         init(convertView);
+        imgBack.setOnClickListener(v -> {
+            Log.d(TAG, "push");
+//            ?//push
+        });
         return convertView;
     }
 

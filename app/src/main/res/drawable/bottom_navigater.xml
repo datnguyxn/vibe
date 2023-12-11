@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<!--actice item color selected, background transparent-->
+    <item android:drawable="@color/colorPrimary" android:state_checked="true" />
+<!--inactive item color unselected, background transparent-->
+    <item android:drawable="@android:color/transparent" />
+</selector>

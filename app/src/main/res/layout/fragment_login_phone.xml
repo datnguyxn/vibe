@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.LoginPhoneFragment">
+    android:background="@color/black"
+    tools:context=".fragments.LoginPhoneFragment"
+    android:orientation="vertical">
 
     <!-- TODO: Update blank fragment layout -->
     <ImageView
         android:id="@+id/imgBack"
-        android:layout_width="35dp"
+        android:layout_width="15dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="5dp"
-        android:layout_marginVertical="@dimen/_20dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="@dimen/_10dp"
         android:adjustViewBounds="true"
         android:src="@drawable/left_arrow" />
 
     <LinearLayout
         android:id="@+id/ll_1"
-        android:layout_marginVertical="@dimen/_50dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_30dp"
@@ -27,7 +28,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="@dimen/_20dp"
+            android:layout_marginVertical="5dp"
             android:text="@string/login"
             android:textColor="#F5F5FA"
             android:textSize="@dimen/_20sp" />
@@ -38,7 +39,8 @@
             android:layout_gravity="center"
             android:layout_marginBottom="@dimen/_16dp"
             android:background="@drawable/button_border_gray_flat"
-            android:paddingHorizontal="@dimen/_8dp">
+            android:paddingHorizontal="@dimen/_8dp"
+            app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edtPhoneNumber"
@@ -68,4 +70,4 @@
             app:cornerRadius="@dimen/_1dp" />
     </LinearLayout>
 
-</FrameLayout>
+</LinearLayout>

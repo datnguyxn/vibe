@@ -19,6 +19,11 @@ public class User {
 
     }
 
+    public User(String uuid, String phoneNumber) {
+        this.uuid = uuid;
+        this.phoneNumber = phoneNumber;
+    }
+
     public User(String uuid, String username, String password, String phoneNumber) {
         this.uuid = uuid;
         this.username = username;

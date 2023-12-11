@@ -28,6 +28,15 @@ public class Playlist {
         this.songs = songs;
     }
 
+    public Playlist(String id, String playlistName, String description, String image, String userId, String createDate) {
+        this.id = id;
+        this.playlistName = playlistName;
+        this.description = description;
+        this.image = image;
+        this.userId = userId;
+        this.createdDate = createDate;
+    }
+
     //getters & setters
     public String getId() {
         return id;

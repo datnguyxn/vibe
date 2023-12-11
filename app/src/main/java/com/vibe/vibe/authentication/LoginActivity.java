@@ -1,20 +1,40 @@
 package com.vibe.vibe.authentication;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.PhoneAuthOptions;
+import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.vibe.vibe.MainActivity;
 import com.vibe.vibe.R;
+import com.vibe.vibe.constants.Application;
 import com.vibe.vibe.fragments.LoginPhoneFragment;
+import com.vibe.vibe.models.PlaylistModel;
+import com.vibe.vibe.models.UserModel;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
@@ -22,24 +42,41 @@ public class LoginActivity extends AppCompatActivity {
     private MaterialButton btnLogin, btnLoginGG, btnLoginPhone;
     private TextView tvForgotPassword, tvRegister;
     private FirebaseAuth mAuth;
+    private GoogleSignInClient mGoogleSignInClient;
+    private PhoneAuthOptions options;
+    private DatabaseReference database;
+    private Dialog dialog;
+    private UserModel userModel;
+    private String uuid = "";
+    private String code;
+    PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         init();
-        Log.d(TAG, "onCreate: ");
+
+        getDataIntent();
+
+        Log.d(TAG, "LoginActivity: Create");
         tvRegister.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
 
         btnLoginPhone.setOnClickListener(v -> {
-            Log.d(TAG, "onCreate: ");
+            Log.d(TAG, "Login use phone number");
             replaceFragment(new LoginPhoneFragment());
         });
 
+        btnLoginGG.setOnClickListener(v -> {
+            Log.d(TAG, "Login use Google");
+            handleLoginUseGoogle();
+        });
+
     }
+
 
     private void init() {
         edtPhoneNumber = findViewById(R.id.edtPhoneNumber);
@@ -50,6 +87,24 @@ public class LoginActivity extends AppCompatActivity {
         tvForgotPassword = findViewById(R.id.tvForgetPassword);
         tvRegister = findViewById(R.id.tvRegister);
         mAuth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance().getReference();
+        userModel = new UserModel(database);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        dialog = new Dialog(this);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+        uuid = sharedPreferences.getString("uuid", "");
+    }
+
+    private void getDataIntent() {
+        Intent intent = getIntent();
+        if (intent != null) {
+            code = intent.getStringExtra("code");
+        }
     }
 
     private void replaceFragment(Fragment fragment) {
@@ -57,5 +112,56 @@ public class LoginActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame_layout, fragment);
         fragmentTransaction.commit();
+    }
+
+
+    private void handleLoginUseGoogle() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, Application.RC_SIGN_IN);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == Application.RC_SIGN_IN) {
+            Log.d(TAG, "onActivityResult: Login Google");
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                Log.d(TAG, "onActivityResult: Login Google ->" + account.getId());
+                handleAuthGoogleByFirebase(account.getIdToken());
+            } catch (Exception e) {
+                Log.d(TAG, "onActivityResult: " + e.getMessage());
+            }
+
+        }
+    }
+
+    private void handleAuthGoogleByFirebase(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "onComplete: Login Google success");
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            userModel.addUserByGoogle(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl());
+                            Log.d(TAG, "onComplete: Login Google success -> " + user.getDisplayName());
+                            SharedPreferences sharedPreferences = getSharedPreferences(Application.SHARED_PREFERENCES_USER, MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString(Application.SHARED_PREFERENCES_UUID, user.getUid());
+                            editor.apply();
+                        }
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+
+                    } else {
+                        Log.d(TAG, "onComplete: Login Google failed");
+                    }
+                })
+                .addOnFailureListener(this, e -> {
+                    Log.d(TAG, "onFailure: " + e.getMessage());
+                });
     }
 }

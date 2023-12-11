@@ -4,4 +4,43 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
     </style>
+
+    <style name="TextLabel" parent="TextAppearance.Design.Hint">
+        <item name="android:textSize">14sp</item>
+        <item name="boxBackgroundMode">none</item>
+        <item name="android:textColor">@color/fifty_percent_black_overlay</item>
+        <item name="boxStrokeWidth">0dp</item>
+    </style>
+    <style name="Theme.Phonograph.Notification" parent="@android:style/TextAppearance.StatusBar.EventContent" />
+
+    <style name="Theme.Phonograph.Notification.Title" parent="@android:style/TextAppearance.StatusBar.EventContent.Title" />
+
+
+    <style name="rounded4dpImageView" parent="">
+        <item name="cornerSize">4dp</item>
+    </style>
+
+    <style name="circleImage">
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="buttonOnlyIcon">
+        <item name="iconPadding">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:minWidth">32dp</item>
+        <item name="android:minHeight">32dp</item>
+    </style>
+
+    <style name="Widget.Theme.Logify.ButtonBar.Fullscreen" parent="">
+        <item name="android:background">@color/black_overlay</item>
+        <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
+    </style>
+    
+    <style name="Widget.Vibe.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
+<!--        change color when selected-->
+
+    </style>
 </resources>
