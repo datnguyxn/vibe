@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -32,12 +33,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.vibe.vibe.MainActivity;
 import com.vibe.vibe.R;
 import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.entities.User;
 import com.vibe.vibe.fragments.LoginPhoneFragment;
 import com.vibe.vibe.models.PlaylistModel;
 import com.vibe.vibe.models.UserModel;
 
 public class LoginActivity extends AppCompatActivity {
-    private static final String TAG = "LoginActivity";
+    private static final String TAG = LoginActivity.class.getSimpleName();
     private TextInputEditText edtPhoneNumber, edtPassword;
     private MaterialButton btnLogin, btnLoginGG, btnLoginPhone;
     private TextView tvForgotPassword, tvRegister;
@@ -46,9 +48,10 @@ public class LoginActivity extends AppCompatActivity {
     private PhoneAuthOptions options;
     private DatabaseReference database;
     private Dialog dialog;
-    private UserModel userModel;
+    private final UserModel userModel = new UserModel();
     private String uuid = "";
     private String code;
+    private String phone, password;
     PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
 
     @Override
@@ -65,6 +68,11 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        tvForgotPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(intent);
+        });
+
         btnLoginPhone.setOnClickListener(v -> {
             Log.d(TAG, "Login use phone number");
             replaceFragment(new LoginPhoneFragment());
@@ -73,6 +81,12 @@ public class LoginActivity extends AppCompatActivity {
         btnLoginGG.setOnClickListener(v -> {
             Log.d(TAG, "Login use Google");
             handleLoginUseGoogle();
+        });
+
+        btnLogin.setOnClickListener(v -> {
+            Log.d(TAG, "Login use phone number");
+            prepareData();
+            handleLoginWithPhoneNumber();
         });
 
     }
@@ -88,7 +102,6 @@ public class LoginActivity extends AppCompatActivity {
         tvRegister = findViewById(R.id.tvRegister);
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance().getReference();
-        userModel = new UserModel(database);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -145,7 +158,7 @@ public class LoginActivity extends AppCompatActivity {
                         Log.d(TAG, "onComplete: Login Google success");
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
-                            userModel.addUserByGoogle(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl());
+                            userModel.addUserByGoogle(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl(), user.getUid());
                             Log.d(TAG, "onComplete: Login Google success -> " + user.getDisplayName());
                             SharedPreferences sharedPreferences = getSharedPreferences(Application.SHARED_PREFERENCES_USER, MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -163,5 +176,65 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnFailureListener(this, e -> {
                     Log.d(TAG, "onFailure: " + e.getMessage());
                 });
+    }
+
+    private void prepareData() {
+        phone = edtPhoneNumber.getText().toString().toLowerCase();
+        password = edtPassword.getText().toString().toLowerCase();
+
+        if (phone.isEmpty()) {
+            edtPhoneNumber.setError("Phone is required");
+            edtPhoneNumber.requestFocus();
+            return;
+        }
+
+        if (phone.length() < 10) {
+            edtPhoneNumber.setError("Phone must be at least 10 characters");
+            edtPhoneNumber.requestFocus();
+            return;
+        }
+
+        if (password.isEmpty()) {
+            edtPassword.setError("Password is required");
+            edtPassword.requestFocus();
+            return;
+        }
+
+        if (password.length() < 6) {
+            edtPassword.setError("Password must be at least 6 characters");
+            edtPassword.requestFocus();
+            return;
+        }
+
+        if (!phone.startsWith(Application.COUNTRY_CODE)) {
+            phone = Application.COUNTRY_CODE + phone.substring(1);
+        }
+
+        Log.d(TAG, "prepareData: " + phone + " " + password);
+    }
+
+    private void handleLoginWithPhoneNumber() {
+        userModel.loginWithPhoneNumber(phone, password, new UserModel.LoginCallBacks() {
+
+            @Override
+            public void onCompleted(User user) {
+                if (user != null) {
+                    Log.d(TAG, "onCompleted: Login success");
+                    SharedPreferences sharedPreferences = getSharedPreferences(Application.SHARED_PREFERENCES_USER, MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(Application.SHARED_PREFERENCES_UUID, user.getUuid());
+                    editor.apply();
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure() {
+                Log.d(TAG, "onFailure: Login failed");
+                Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

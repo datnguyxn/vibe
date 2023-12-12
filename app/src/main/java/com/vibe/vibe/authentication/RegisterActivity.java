@@ -1,7 +1,5 @@
 package com.vibe.vibe.authentication;
 
-import static android.os.Build.VERSION_CODES.P;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,12 +18,10 @@ import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.vibe.vibe.R;
 import com.vibe.vibe.entities.User;
-import com.vibe.vibe.fragments.OTPVerifyFragment;
 import com.vibe.vibe.models.UserModel;
 import com.vibe.vibe.utils.HashPassword;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -53,7 +49,6 @@ public class RegisterActivity extends AppCompatActivity {
         });
         btnRegister.setOnClickListener(v -> {
             prepareData();
-            callbackAuth();
             handleRegister();
         });
     }
@@ -65,6 +60,7 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister = findViewById(R.id.btnRegister);
         tvLogin = findViewById(R.id.tvLogin);
         mAuth = FirebaseAuth.getInstance();
+        callbackAuth();
     }
 
     private void prepareData() {

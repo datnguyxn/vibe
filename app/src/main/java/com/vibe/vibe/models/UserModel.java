@@ -9,9 +9,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.PhoneAuthOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.vibe.vibe.entities.User;
+import com.vibe.vibe.utils.HashPassword;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
@@ -22,7 +28,7 @@ public class UserModel extends Model {
     private static final String TAG = "UserModel";
     private PhoneAuthOptions phoneAuthOptions;
     private String verificationId = "";
-    private PlaylistModel playlistModel = new PlaylistModel();
+    private final PlaylistModel playlistModel = new PlaylistModel();
     private final String USERS_COLLECTION = "users";
 
     public interface UserCallBacks {
@@ -31,20 +37,25 @@ public class UserModel extends Model {
 
     public interface isExistListener {
         void onExist(User user);
+
         void onNotFound();
     }
 
     public interface onAddConfigListener {
         void onCompleted();
+
         void onFailure();
     }
 
     public interface onGetConfigListener {
         void onCompleted(List<Map<String, Object>> config);
+
         void onFailure();
     }
+
     public interface LoginCallBacks {
         void onCompleted(User user);
+
         void onFailure();
     }
 
@@ -56,8 +67,44 @@ public class UserModel extends Model {
         super(database);
     }
 
-    public void addUserByGoogle(String uuid, String username, String email, Uri avatar) {
-        User user = new User(uuid, username, email, avatar.toString());
+    public void loginWithPhoneNumber(String phone, String password, LoginCallBacks callBacks) {
+        Query query = database.child(USERS_COLLECTION);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean isExist = false;
+                User user = null;
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    user = dataSnapshot.getValue(User.class);
+                    if (user != null) {
+                        try {
+                            if (user.getPhoneNumber().equals(phone) && HashPassword.verifyPassword(password, user.getPassword())) {
+                                isExist = true;
+                                callBacks.onCompleted(user);
+                                break;
+                            }
+                        } catch (NoSuchAlgorithmException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        Log.e(TAG, "onDataChange: user is null");
+                    }
+                }
+                if (!isExist) {
+                    callBacks.onFailure();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: " + error.getMessage());
+                callBacks.onFailure();
+            }
+        });
+    }
+
+    public void addUserByGoogle(String uuid, String username, String email, Uri avatar, String playlistId) {
+        User user = new User(uuid, username, email, avatar, playlistId);
         database.child(USERS_COLLECTION).child(uuid).setValue(user.toMap())
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -79,7 +126,7 @@ public class UserModel extends Model {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG,"onFailure: " + e.getMessage());
+                        Log.e(TAG, "onFailure: " + e.getMessage());
                     }
                 });
 
@@ -108,25 +155,54 @@ public class UserModel extends Model {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG,"onFailure: " + e.getMessage());
+                        Log.e(TAG, "onFailure: " + e.getMessage());
                     }
                 });
     }
 
     public void checkUserIsExist(String phone, isExistListener isExistListener) {
-        database.child(USERS_COLLECTION).orderByChild("phoneNumber").equalTo(phone).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                if (task.getResult().getValue() != null) {
-                    User user = task.getResult().getValue(User.class);
-                    Log.e(TAG, "checkUserIsExist: user is exist");
-                    isExistListener.onExist(user);
-                } else {
-                    Log.e(TAG, "checkUserIsExist: user is not exist");
+        Query query = database.child(USERS_COLLECTION);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean isExist = false;
+                User user = null;
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    user = dataSnapshot.getValue(User.class);
+                    if (user != null) {
+                        if (user.getPhoneNumber().equals(phone)) {
+                            isExist = true;
+                            isExistListener.onExist(user);
+                            break;
+                        }
+                    }
+                }
+                if (!isExist) {
                     isExistListener.onNotFound();
                 }
-            } else {
-                Log.e(TAG, "checkUserIsExist: " + task.getException().getMessage());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: " + error.getMessage());
+                isExistListener.onNotFound();
             }
         });
+    }
+
+    public void updatePassword(String uid, String newPassword) {
+        database.child(USERS_COLLECTION).child(uid).child("password").setValue(newPassword)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Log.e(TAG, "onComplete: update password successfully");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "onFailure: " + e.getMessage());
+                    }
+                });
     }
 }

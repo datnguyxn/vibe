@@ -30,6 +30,7 @@ public class User {
         this.password = password;
         this.phoneNumber = phoneNumber;
     }
+
     public User(String uuid, String username, String phoneNumber, String password, String playlistId) {
         this.uuid = uuid;
         this.username = username;
@@ -37,13 +38,18 @@ public class User {
         this.password = password;
         this.playlistId = playlistId;
     }
+
     public User(String uuid, String username, String email, Uri avatar) {
-        this(uuid, username, email, avatar.toString());
+        this.uuid = uuid;
+        this.username = username;
+        this.email = email;
         this.avatar = avatar;
     }
 
     public User(String uuid, String username, String email, Uri avatar, String playlistId) {
-        this(uuid, username, email, avatar.toString());
+        this.uuid = uuid;
+        this.username = username;
+        this.email = email;
         this.avatar = avatar;
         this.playlistId = playlistId;
     }
@@ -57,6 +63,7 @@ public class User {
         this.playlistId = (String) userMap.get("playlistId");
         this.avatar = Uri.parse((String) userMap.get("avatar"));
     }
+
     //getters & setters
     public String getUuid() {
         return uuid;
@@ -66,7 +73,7 @@ public class User {
         this.uuid = uuid;
     }
 
-     public String getUsername() {
+    public String getUsername() {
         return username;
     }
 
@@ -74,7 +81,7 @@ public class User {
         this.username = username;
     }
 
-     public String getEmail() {
+    public String getEmail() {
         return email;
     }
 
@@ -82,7 +89,7 @@ public class User {
         this.email = email;
     }
 
-     public String getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -90,7 +97,7 @@ public class User {
         this.password = password;
     }
 
-     public String getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
@@ -98,15 +105,15 @@ public class User {
         this.phoneNumber = phoneNumber;
     }
 
-     public Uri getAvatar() {
-        return avatar;
+    public String getAvatar() {
+        return avatar.toString();
     }
 
-    public void setAvatar(Uri avatar) {
-        this.avatar = avatar;
+    public void setAvatar(String avatar) {
+        this.avatar = Uri.parse(avatar);
     }
 
-     public String getPlaylistId() {
+    public String getPlaylistId() {
         return playlistId;
     }
 
@@ -136,6 +143,7 @@ public class User {
 
         return result;
     }
+
     @Override
     public String toString() {
         return "User{" +

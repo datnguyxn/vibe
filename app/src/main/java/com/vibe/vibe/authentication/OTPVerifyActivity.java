@@ -16,9 +16,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseException;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
@@ -33,8 +36,8 @@ import java.util.concurrent.TimeUnit;
 public class OTPVerifyActivity extends AppCompatActivity {
     private static final String TAG = OTPVerifyActivity.class.getSimpleName();
     public static final int REGISTRATION = 1;
-    private static final int LOGIN = 2;
-    private static final int FORGOT_PASSWORD = 3;
+    public static final int LOGIN = 2;
+    public static final int FORGOT_PASSWORD = 3;
     private TextView tvRecentPhone, tvTimer;
     private ImageView imgBack;
     private TextInputEditText edtOTP;
@@ -54,7 +57,8 @@ public class OTPVerifyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_verify);
         init();
-        getDataIntent();
+        countTimer();
+
 
         tvRecentPhone.setOnClickListener(v -> {
             if (isRecent) {
@@ -96,6 +100,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         tvRecentPhone = findViewById(R.id.tvRecent);
         tvTimer = findViewById(R.id.tvTimer);
+        getDataIntent();
         options = PhoneAuthOptions.newBuilder()
                 .setActivity(this)
                 .setTimeout(60L, TimeUnit.SECONDS)
@@ -143,10 +148,50 @@ public class OTPVerifyActivity extends AppCompatActivity {
     }
 
     private void handleForgotPassword(PhoneAuthCredential credential) {
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "handleForgotPassword: Forgot Password success");
+                        FirebaseUser user = task.getResult().getUser();
+                        if (user != null) {
+                            userModel.updatePassword(user.getUid(), newPassword);
+                            Intent intent = new Intent(OTPVerifyActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            finish();
+                            Toast.makeText(OTPVerifyActivity.this, "Change password success", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(OTPVerifyActivity.this, "Register failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .addOnFailureListener(this, e -> {
+                    Toast.makeText(OTPVerifyActivity.this, "Register failed", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void handleLogin(PhoneAuthCredential credential) {
-
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                   if (task.isSuccessful()) {
+                       Log.d(TAG, "handleLogin: Login success");
+                       FirebaseUser user = task.getResult().getUser();
+                       if (user != null) {
+                           SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+                           SharedPreferences.Editor editor = sharedPreferences.edit();
+                           editor.putString("uuid", user.getUid());
+                           editor.apply();
+                           Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
+                           intent.putExtra("username", username);
+                           startActivity(intent);
+                           finish();
+                       } else {
+                           Toast.makeText(OTPVerifyActivity.this, "Register failed", Toast.LENGTH_SHORT).show();
+                       }
+                   }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(OTPVerifyActivity.this, "Register failed", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void handleRegister(PhoneAuthCredential credential) {
@@ -177,13 +222,13 @@ public class OTPVerifyActivity extends AppCompatActivity {
 
     private void getDataIntent() {
         Intent intent = getIntent();
-
-        phoneNumber = intent.getStringExtra("phoneNumber");
+        phoneNumber = intent.getStringExtra("phone");
         verificationId = intent.getStringExtra("verificationId");
         username = intent.getStringExtra("username");
         password = intent.getStringExtra("password");
         actionOption = intent.getIntExtra("actionOption", 0);
         newPassword = intent.getStringExtra("newPassword");
+        Log.d(TAG, "getDataIntent: " + phoneNumber + " " + verificationId + " " + username + " " + password + " " + actionOption);
     }
 
     private final PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
@@ -195,7 +240,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
 
         @Override
         public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
-
+            Log.d(TAG, "onVerificationCompleted: verification completed" + phoneAuthCredential.getSmsCode());
         }
 
         @Override
