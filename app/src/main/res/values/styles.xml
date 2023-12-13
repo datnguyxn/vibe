@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="roundedImageView" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
@@ -11,6 +12,7 @@
         <item name="android:textColor">@color/fifty_percent_black_overlay</item>
         <item name="boxStrokeWidth">0dp</item>
     </style>
+
     <style name="Theme.Phonograph.Notification" parent="@android:style/TextAppearance.StatusBar.EventContent" />
 
     <style name="Theme.Phonograph.Notification.Title" parent="@android:style/TextAppearance.StatusBar.EventContent.Title" />
@@ -38,9 +40,15 @@
         <item name="android:background">@color/black_overlay</item>
         <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
     </style>
-    
+
     <style name="Widget.Vibe.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
-<!--        change color when selected-->
+        <!--        change color when selected-->
 
     </style>
+
+    <style name="circleImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
 </resources>
