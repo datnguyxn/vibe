@@ -1,5 +1,6 @@
 package com.vibe.vibe.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.vibe.vibe.R;
+import com.vibe.vibe.utils.MainActivityListener;
 
 import java.util.Objects;
 
@@ -37,13 +39,10 @@ public class PlayerFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     private static final String TAG = PlayerFragment.class.getSimpleName();
+    private MainActivityListener mainActivityListener;
     private ImageView hide, more, ivSongImage, ivLike, ivShuffle, ivPrevious, ivPlay, ivNext, ivRepeat;
     private TextView tvSongName, tvArtistName, tvCurrentTime, tvTotalTime;
     private SeekBar seekBar;
-    private BottomNavigationView bottomNavigationView;
-    private CardView bottomCurrentSong;
-    private View fragment;
-    private Bundle bundle;
     public PlayerFragment() {
         // Required empty public constructor
     }
@@ -89,14 +88,39 @@ public class PlayerFragment extends Fragment {
         hide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bottomCurrentSong.setVisibility(View.VISIBLE);
-                bottomNavigationView.setVisibility(View.VISIBLE);
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) fragment.getLayoutParams();
-                params.setMargins(0, 0, 0, 0);
-                fragment.setLayoutParams(params);
-                replaceFragment(new HomeFragment());
+                HomeFragment homeFragment = new HomeFragment();
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.setCustomAnimations(R.anim.slide_down, 0, 0, R.anim.slide_down);
+                fragmentTransaction.replace(R.id.frameLayout, homeFragment);
+                fragmentTransaction.commit();
+                showNavigationViews();
             }
         });
+
+        more.setOnClickListener(v -> {
+            Log.d(TAG, "onClick: more");
+            MoreOptionBottomSheetFragment moreOptionBottomSheetFragment = new MoreOptionBottomSheetFragment();
+            moreOptionBottomSheetFragment.show(getChildFragmentManager(), moreOptionBottomSheetFragment.getTag());
+        });
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof MainActivityListener) {
+            mainActivityListener = (MainActivityListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement MainActivityListener");
+        }
+    }
+
+
+    private void showNavigationViews() {
+        if (mainActivityListener != null) {
+            mainActivityListener.showNavigationViews();
+        }
     }
 
     private void init(View view) {

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:id="@+id/svMoreOptionBottomSheetFragment"
+    tools:context=".fragments.MoreOptionBottomSheetFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/ivMorePicture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/more_pic"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="@dimen/_50dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/tvMoreSong"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textColor="@color/FlatWhite"
+            android:layout_marginTop="@dimen/_10dp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:text="@string/Pretty_girl_cheat_codes_x_cade_remix"
+            app:layout_constraintTop_toBottomOf="@+id/ivMorePicture"/>
+
+        <TextView
+            android:id="@+id/tvMoreArtist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/tvMoreSong"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="5dp"
+            android:text="@string/maggie_lindermann"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/tvLikeArtist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/liked"
+            android:drawableLeft="@drawable/like"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvMoreArtist"
+            android:textColor="@color/FlatWhite"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/_30dp"
+            android:layout_marginStart="@dimen/_40dp"
+            android:drawablePadding="@dimen/_20dp"/>
+
+        <TextView
+            android:id="@+id/tvAddToPlaylist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_to_playlist"
+            android:drawableLeft="@drawable/add_to_playlist"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvLikeArtist"
+            android:textColor="@color/FlatWhite"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/_30dp"
+            android:layout_marginStart="@dimen/_40dp"
+            android:drawablePadding="@dimen/_20dp"/>
+
+        <TextView
+            android:id="@+id/tvDownload"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/download"
+            android:drawableLeft="@drawable/download"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvAddToPlaylist"
+            android:textColor="@color/FlatWhite"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/_30dp"
+            android:layout_marginStart="@dimen/_40dp"
+            android:drawablePadding="@dimen/_20dp"/>
+
+        <TextView
+            android:id="@+id/tvShare"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/share"
+            android:drawableLeft="@drawable/share"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvDownload"
+            android:textColor="@color/FlatWhite"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/_30dp"
+            android:layout_marginStart="@dimen/_40dp"
+            android:drawablePadding="@dimen/_20dp"/>
+
+        <TextView
+            android:id="@+id/tvClose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvShare"
+            android:textColor="@color/FlatWhite"
+            android:text="@string/close"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/_30dp"
+            android:gravity="center"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

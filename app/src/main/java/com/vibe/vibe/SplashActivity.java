@@ -40,8 +40,9 @@ public class SplashActivity extends AppCompatActivity {
                     if (uuid != null) {
                         Log.e(TAG, "run: uuid found " + uuid);
                         Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
+                        overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
 //                        finish();
                     } else {
                         Log.e(TAG, "run: uuid not found " + uuid);

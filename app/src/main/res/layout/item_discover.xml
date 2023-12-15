@@ -3,22 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/itemHome"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/_10dp"
+    android:layout_marginEnd="@dimen/_20dp"
     android:orientation="vertical">
 
     <ImageView
         android:id="@+id/ivItem"
         android:layout_marginBottom="@dimen/_10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:src="@drawable/item"/>
 
     <TextView
         android:id="@+id/tvItemName"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Chapters"
+        android:maxLines="2"
+        android:ellipsize="end"
         android:textColor="@color/FlatWhite"
         android:textSize="@dimen/_20sp" />
 

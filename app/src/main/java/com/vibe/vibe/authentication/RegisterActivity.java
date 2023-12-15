@@ -46,6 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
         tvLogin.setOnClickListener(v -> {
             Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
         });
         btnRegister.setOnClickListener(v -> {
             prepareData();
@@ -153,6 +154,7 @@ public class RegisterActivity extends AppCompatActivity {
                 intent.putExtra("actionOption", OTPVerifyActivity.REGISTRATION);
                 verificationId = s;
                 startActivity(intent);
+                overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
                 finish();
             }
         };

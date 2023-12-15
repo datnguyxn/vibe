@@ -157,6 +157,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
                             userModel.updatePassword(user.getUid(), newPassword);
                             Intent intent = new Intent(OTPVerifyActivity.this, LoginActivity.class);
                             startActivity(intent);
+                            overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
                             finish();
                             Toast.makeText(OTPVerifyActivity.this, "Change password success", Toast.LENGTH_SHORT).show();
                         } else {
@@ -183,6 +184,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
                            Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
                            intent.putExtra("username", username);
                            startActivity(intent);
+                           overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
                            finish();
                        } else {
                            Toast.makeText(OTPVerifyActivity.this, "Register failed", Toast.LENGTH_SHORT).show();
@@ -209,6 +211,7 @@ public class OTPVerifyActivity extends AppCompatActivity {
                             Intent intent = new Intent(OTPVerifyActivity.this, MainActivity.class);
                             intent.putExtra("username", username);
                             startActivity(intent);
+                            overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
                             finish();
                         }
                     } else {

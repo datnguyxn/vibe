@@ -45,6 +45,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         imgBack.setOnClickListener(v -> {
             Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
             finish();
         });
         btnSubmit.setOnClickListener(v -> {
@@ -85,6 +86,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 intent.putExtra("actionOption", OTPVerifyActivity.FORGOT_PASSWORD);
                 verificationId = s;
                 startActivity(intent);
+                overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
                 finish();
             }
         };

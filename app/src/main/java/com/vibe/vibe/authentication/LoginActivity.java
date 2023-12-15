@@ -65,11 +65,13 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "LoginActivity: Create");
         tvRegister.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
             startActivity(intent);
         });
 
         tvForgotPassword.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
             startActivity(intent);
         });
 
@@ -123,6 +125,7 @@ public class LoginActivity extends AppCompatActivity {
     private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.setCustomAnimations(R.anim.slide_to_right,0, 0, R.anim.slide_to_right);
         fragmentTransaction.replace(R.id.frame_layout, fragment);
         fragmentTransaction.commit();
     }
@@ -167,6 +170,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
+                        overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
                         finish();
 
                     } else {
@@ -225,6 +229,7 @@ public class LoginActivity extends AppCompatActivity {
                     editor.putString(Application.SHARED_PREFERENCES_UUID, user.getUuid());
                     editor.apply();
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
                     startActivity(intent);
                     finish();
                 }

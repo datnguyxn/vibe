@@ -2,13 +2,35 @@ package com.vibe.vibe.fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.vibe.vibe.R;
+import com.vibe.vibe.adapters.DiscoverAdapter;
+import com.vibe.vibe.adapters.RandomPlaylistsAdapter;
+import com.vibe.vibe.adapters.RecentlySongsAdapter;
+import com.vibe.vibe.entities.Album;
+import com.vibe.vibe.models.AlbumModel;
+import com.vibe.vibe.models.ArtistModel;
+import com.vibe.vibe.models.PlaylistModel;
+import com.vibe.vibe.models.UserModel;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,6 +47,20 @@ public class HomeFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private static final String TAG = HomeFragment.class.getSimpleName();
+    private ScrollView fragmentHome;
+    private ConstraintLayout constraintLayout;
+    private TextView tvHello, tvName, tvAlbum, textViewSubtitle;
+    private ImageView ivNotification, ivSettings, ivAlbum, ivLike, ivPlay;
+    private ShapeableImageView ivProfileArtist;
+    private RecyclerView rvDiscover, rvRecentSongs, rvRandomPlaylists;
+    private DiscoverAdapter discoverAdapter;
+    private RecentlySongsAdapter recentlySongsAdapter;
+    private RandomPlaylistsAdapter randomPlaylistsAdapter;
+    private final AlbumModel albumModel = new AlbumModel();
+    private final PlaylistModel playlistModel = new PlaylistModel();
+    private final UserModel userModel = new UserModel();
+    private final ArtistModel artistModel = new ArtistModel();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -61,6 +97,50 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        View view =  inflater.inflate(R.layout.fragment_home, container, false);
+        init(view);
+        fragmentHome = new ScrollView(getContext());
+        constraintLayout = new ConstraintLayout(getContext());
+        fragmentHome.addView(constraintLayout);
+
+        RecyclerView.LayoutManager layoutManagerDiscover = new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false);
+        rvDiscover.setLayoutManager(layoutManagerDiscover);
+        discoverAdapter = new DiscoverAdapter(getContext());
+        rvDiscover.setAdapter(discoverAdapter);
+        getAllAlbums();
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    private void init(View view) {
+        fragmentHome = view.findViewById(R.id.fragmentHome);
+        constraintLayout = view.findViewById(R.id.fragmentHomeLayout);
+        tvHello = view.findViewById(R.id.tvHello);
+        tvName = view.findViewById(R.id.tvName);
+        ivNotification = view.findViewById(R.id.ivNotification);
+        ivSettings = view.findViewById(R.id.ivSettings);
+        ivAlbum = view.findViewById(R.id.ivAlbum);
+        ivLike = view.findViewById(R.id.ivLike);
+        ivPlay = view.findViewById(R.id.ivPlay);
+        ivProfileArtist = view.findViewById(R.id.ivProfileArtist);
+        rvDiscover = view.findViewById(R.id.rvDiscover);
+        rvRecentSongs = view.findViewById(R.id.rvRecentSongs);
+        rvRandomPlaylists = view.findViewById(R.id.rvRandomPlaylists);
+        tvAlbum = view.findViewById(R.id.tvAlbum);
+        textViewSubtitle = view.findViewById(R.id.textViewSubtitle);
+    }
+
+
+    private void getAllAlbums() {
+        albumModel.getAlbums(new AlbumModel.AlbumModelCallbacks() {
+            @Override
+            public void onCallback(ArrayList<Album> albumModels) {
+                discoverAdapter.setAlbums(albumModels);
+            }
+        });
     }
 }

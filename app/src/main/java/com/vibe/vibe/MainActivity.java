@@ -1,7 +1,6 @@
 package com.vibe.vibe;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -11,15 +10,18 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
@@ -33,10 +35,9 @@ import com.vibe.vibe.fragments.LibraryFragment;
 import com.vibe.vibe.fragments.PlayerFragment;
 import com.vibe.vibe.fragments.SearchFragment;
 import com.vibe.vibe.fragments.SettingFragment;
+import com.vibe.vibe.utils.MainActivityListener;
 
-import java.util.Objects;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainActivityListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private BottomNavigationView bottomNavigationView;
     private DrawerLayout drawerLayout;
@@ -45,6 +46,12 @@ public class MainActivity extends AppCompatActivity {
     private View fragment;
     private Bundle bundle;
     private FirebaseAuth mAuth;
+    private BroadcastReceiver onReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,17 +155,13 @@ public class MainActivity extends AppCompatActivity {
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) fragment.getLayoutParams();
             params.setMargins(0, 0, 0, 0);
             fragment.setLayoutParams(params);
-            bundle = new Bundle();
-            bundle.putString("bottomCurrentSong", bottomCurrentSong.toString());
-            bundle.putString("bottomNavigationView", bottomNavigationView.toString());
-            bundle.putString("fragment", fragment.toString());
-            PlayerFragment playerFragment = new PlayerFragment();
-            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            playerFragment.setArguments(bundle);
-            fragmentTransaction.replace(R.id.frameLayout, playerFragment);
-            fragmentTransaction.commit();
             bottomCurrentSong.setVisibility(View.GONE);
             bottomNavigationView.setVisibility(View.GONE);
+            PlayerFragment fragment = new PlayerFragment();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.anim.slide_up, 0, 0, R.anim.slide_up);
+            transaction.replace(R.id.frameLayout, fragment);
+            transaction.commit();
         });
     }
 
@@ -169,5 +172,14 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void showNavigationViews() {
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) fragment.getLayoutParams();
+        params.setMargins(0, 0, 0, 64);
+        fragment.setLayoutParams(params);
+        bottomCurrentSong.setVisibility(View.VISIBLE);
+        bottomNavigationView.setVisibility(View.VISIBLE);
     }
 }

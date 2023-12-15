@@ -26,8 +26,6 @@ import java.util.Map;
 
 public class UserModel extends Model {
     private static final String TAG = "UserModel";
-    private PhoneAuthOptions phoneAuthOptions;
-    private String verificationId = "";
     private final PlaylistModel playlistModel = new PlaylistModel();
     private final String USERS_COLLECTION = "users";
 

@@ -2,6 +2,7 @@ package com.vibe.vibe.entities;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Album implements Serializable {
     private String id;
@@ -13,6 +14,20 @@ public class Album implements Serializable {
     private ArrayList<String> artistIds;
     private ArrayList<Song> songs;
 
+    public Album() {
+    }
+
+    public Album(String id, String name, String description, String image, String createdDate, ArrayList<Artist> artists, ArrayList<String> artistIds, ArrayList<Song> songs) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.image = image;
+        this.createdDate = createdDate;
+        this.artists = artists;
+        this.artistIds = artistIds;
+        this.songs = songs;
+    }
+
     //getters & setters
     public String getId() {
         return id;
@@ -22,7 +37,7 @@ public class Album implements Serializable {
         this.id = id;
     }
 
-     public String getName() {
+    public String getName() {
         return name;
     }
 
@@ -30,7 +45,7 @@ public class Album implements Serializable {
         this.name = name;
     }
 
-     public String getDescription() {
+    public String getDescription() {
         return description;
     }
 
@@ -38,7 +53,7 @@ public class Album implements Serializable {
         this.description = description;
     }
 
-     public String getImage() {
+    public String getImage() {
         return image;
     }
 
@@ -46,7 +61,7 @@ public class Album implements Serializable {
         this.image = image;
     }
 
-     public String getCreatedDate() {
+    public String getCreatedDate() {
         return createdDate;
     }
 
@@ -54,7 +69,7 @@ public class Album implements Serializable {
         this.createdDate = createdDate;
     }
 
-     public ArrayList<Artist> getArtists() {
+    public ArrayList<Artist> getArtists() {
         return artists;
     }
 
@@ -62,7 +77,7 @@ public class Album implements Serializable {
         this.artists = artists;
     }
 
-     public ArrayList<String> getArtistIds() {
+    public ArrayList<String> getArtistIds() {
         return artistIds;
     }
 
@@ -70,12 +85,23 @@ public class Album implements Serializable {
         this.artistIds = artistIds;
     }
 
-     public ArrayList<Song> getSongs() {
+    public ArrayList<Song> getSongs() {
         return songs;
     }
 
     public void setSongs(ArrayList<Song> songs) {
         this.songs = songs;
+    }
+
+    public Album(HashMap<String, Object> albumMap) {
+        this.id = (String) albumMap.get("id");
+        this.name = (String) albumMap.get("name");
+        this.description = (String) albumMap.get("description");
+        this.image = (String) albumMap.get("image");
+        this.createdDate = (String) albumMap.get("createdDate");
+        this.artists = (ArrayList<Artist>) albumMap.get("artists");
+        this.artistIds = (ArrayList<String>) albumMap.get("artistIds");
+        this.songs = (ArrayList<Song>) albumMap.get("songs");
     }
 
     @Override

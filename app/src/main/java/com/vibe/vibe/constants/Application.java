@@ -7,4 +7,10 @@ public class Application {
     public static final String SONGS_ARG = "songs";
     public static final String SHARED_PREFERENCES_UUID = "uuid";
     public static final String SHARED_PREFERENCES_USER = "user";
+    public static final String UPDATE_UI = "updateUI";
+    public static final String CURRENT_SONG = "song";
+    public static final String IS_PLAYING = "isPlaying";
+    public static final String ACTION_TYPE = "action";
+    public static final String SONG_INDEX = "songIndex";
+    public static final String SONG_UPLOAD = "songUpload";
 }

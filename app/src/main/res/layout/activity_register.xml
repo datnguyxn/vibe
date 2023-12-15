@@ -11,6 +11,8 @@
         android:id="@+id/ll_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         android:layout_marginHorizontal="@dimen/_30dp"
         android:orientation="vertical">
         <TextView
