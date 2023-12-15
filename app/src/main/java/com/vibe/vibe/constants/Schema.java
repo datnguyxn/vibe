@@ -3,8 +3,8 @@ package com.vibe.vibe.constants;
 public class Schema {
     private static final String SONGS = "songs";
     private static final String USERS = "users";
-    private static final String ARTISTS = "artists";
-    private static final String ALBUMS = "albums";
+    public static final String ARTISTS = "artists";
+    public static final String ALBUMS = "albums";
     private static final String FAVORITE_SONGS = "favoriteSongs";
     private static final String FAVORITE_ARTISTS = "favoriteArtists";
     private static final String FAVORITE_ALBUMS = "favoriteAlbums";

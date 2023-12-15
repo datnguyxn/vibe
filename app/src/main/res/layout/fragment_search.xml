@@ -19,31 +19,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!--    <com.google.android.material.textfield.TextInputLayout-->
-    <!--        android:id="@+id/edtSearchLayout"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toBottomOf="@+id/tvSearch"-->
-    <!--        android:layout_marginTop="@dimen/_10dp"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content">-->
-
-    <!--        <com.google.android.material.textfield.TextInputEditText-->
-    <!--            android:id="@+id/edtSearch"-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_marginHorizontal="10dp"-->
-    <!--            android:background="@drawable/rounded_edittext"-->
-    <!--            android:drawableLeft="@drawable/search"-->
-    <!--            android:drawablePadding="8dp"-->
-    <!--            android:ems="10"-->
-    <!--            android:hint="Search somethings you want"-->
-    <!--            android:imeOptions="actionDone"-->
-    <!--            android:inputType="textPersonName"-->
-    <!--            app:strokeColor="@color/white"-->
-    <!--            app:strokeWidth="2dp"-->
-    <!--            android:textSize="18sp" />-->
-    <!--    </com.google.android.material.textfield.TextInputLayout>-->
-
     <androidx.appcompat.widget.SearchView
         android:id="@+id/edtSearchLayout"
         android:layout_width="match_parent"
@@ -57,119 +32,128 @@
         app:layout_constraintTop_toBottomOf="@+id/tvSearch"
         app:queryBackground="@null"
         app:queryHint="Search somethings you want"
-        app:searchIcon="@drawable/search"
-        app:textColorHint="@color/FlatWhite">
+        app:searchIcon="@drawable/search">
 
     </androidx.appcompat.widget.SearchView>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcSearchResults"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_10dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtSearchLayout">
+        app:layout_constraintTop_toBottomOf="@+id/edtSearchLayout"
+        >
 
     </androidx.recyclerview.widget.RecyclerView>
 
-    <LinearLayout
+    <ProgressBar
+        android:id="@+id/progressBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginHorizontal="@dimen/_10dp"
+        android:layout_marginTop="@dimen/_10dp"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rcSearchResults">
+        app:layout_constraintTop_toBottomOf="@+id/edtSearchLayout" />
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:orientation="vertical"-->
+    <!--        android:layout_marginHorizontal="@dimen/_10dp"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@+id/rcSearchResults">-->
 
 
-        <LinearLayout
-            android:id="@+id/llGenre1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+    <!--        <LinearLayout-->
+    <!--            android:id="@+id/llGenre1"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="wrap_content"-->
 
-            android:layout_marginTop="@dimen/_20dp"
-            android:gravity="center"
-            android:orientation="horizontal">
+    <!--            android:layout_marginTop="@dimen/_20dp"-->
+    <!--            android:gravity="center"-->
+    <!--            android:orientation="horizontal">-->
 
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/Charts" />
+    <!--            <ImageView-->
+    <!--                android:layout_width="0dp"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_weight="1"-->
+    <!--                android:src="@drawable/Charts" />-->
 
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/Electronic" />
-        </LinearLayout>
+    <!--            <ImageView-->
+    <!--                android:layout_width="0dp"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_weight="1"-->
+    <!--                android:src="@drawable/Electronic" />-->
+    <!--        </LinearLayout>-->
 
-        <LinearLayout
-            android:id="@+id/llGenre2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_20dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/llGenre1">
+    <!--        <LinearLayout-->
+    <!--            android:id="@+id/llGenre2"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_marginTop="@dimen/_20dp"-->
+    <!--            android:gravity="center"-->
+    <!--            android:orientation="horizontal"-->
+    <!--            app:layout_constraintStart_toStartOf="parent"-->
+    <!--            app:layout_constraintTop_toBottomOf="@+id/llGenre1">-->
 
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/Focus" />
+    <!--            <ImageView-->
+    <!--                android:layout_width="0dp"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_weight="1"-->
+    <!--                android:src="@drawable/Focus" />-->
 
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/Workout" />
-        </LinearLayout>
+    <!--            <ImageView-->
+    <!--                android:layout_width="0dp"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_weight="1"-->
+    <!--                android:src="@drawable/Workout" />-->
+    <!--        </LinearLayout>-->
 
-        <LinearLayout
-            android:id="@+id/llGenre3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_20dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/llGenre2">
+    <!--        <LinearLayout-->
+    <!--            android:id="@+id/llGenre3"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_marginTop="@dimen/_20dp"-->
+    <!--            android:gravity="center"-->
+    <!--            android:orientation="horizontal"-->
+    <!--            app:layout_constraintStart_toStartOf="parent"-->
+    <!--            app:layout_constraintTop_toBottomOf="@+id/llGenre2">-->
 
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/Sleep" />
+    <!--            <ImageView-->
+    <!--                android:layout_width="0dp"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_weight="1"-->
+    <!--                android:src="@drawable/Sleep" />-->
 
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/Party" />
-        </LinearLayout>
+    <!--            <ImageView-->
+    <!--                android:layout_width="0dp"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_weight="1"-->
+    <!--                android:src="@drawable/Party" />-->
+    <!--        </LinearLayout>-->
 
-        <LinearLayout
-            android:id="@+id/llGenre4"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_20dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/llGenre3">
+    <!--        <LinearLayout-->
+    <!--            android:id="@+id/llGenre4"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_marginTop="@dimen/_20dp"-->
+    <!--            android:gravity="center"-->
+    <!--            android:orientation="horizontal"-->
+    <!--            app:layout_constraintStart_toStartOf="parent"-->
+    <!--            app:layout_constraintTop_toBottomOf="@+id/llGenre3">-->
 
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/HipHop" />
+    <!--            <ImageView-->
+    <!--                android:layout_width="0dp"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_weight="1"-->
+    <!--                android:src="@drawable/HipHop" />-->
 
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/RnB" />
-        </LinearLayout>
-    </LinearLayout>
+    <!--            <ImageView-->
+    <!--                android:layout_width="0dp"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_weight="1"-->
+    <!--                android:src="@drawable/RnB" />-->
+    <!--        </LinearLayout>-->
+    <!--    </LinearLayout>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

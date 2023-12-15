@@ -26,6 +26,13 @@ public class AlbumModel extends Model {
         void onCallback(AlbumModel albumModel);
     }
 
+    public interface AlbumSearchListener {
+        void onAlbumBeginSearch();
+        void onAlbumSearchResult(ArrayList<Object> albums);
+        void onSongSearchResult(ArrayList<Object> songs);
+        void onAlbumSearchError(String error);
+    }
+
     public interface AlbumModelCallbacks {
         void onCallback(ArrayList<Album> albumModels);
     }
@@ -120,5 +127,9 @@ public class AlbumModel extends Model {
                 albumModelCallbacks.onCallback(null);
             }
         });
+    }
+
+    public void search(String key, AlbumSearchListener listener) {
+
     }
 }

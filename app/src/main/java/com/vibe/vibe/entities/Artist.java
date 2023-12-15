@@ -1,13 +1,17 @@
 package com.vibe.vibe.entities;
 
 
+import com.google.firebase.database.Exclude;
+
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Artist implements Serializable {
     private String id;
     private String name;
     private String bio;
-    private String image;
+    private String thumbnail;
     private String createdDate;
     private String playlistId;
 
@@ -15,26 +19,26 @@ public class Artist implements Serializable {
 
     }
 
-    public Artist(String id, String name, String bio, String image, String createdDate, String playlistId) {
+    public Artist(String id, String name, String bio, String thumbnail, String createdDate, String playlistId) {
         this.id = id;
         this.name = name;
         this.bio = bio;
-        this.image = image;
+        this.thumbnail = thumbnail;
         this.createdDate = createdDate;
         this.playlistId = playlistId;
     }
 
-    public Artist(String id, String name, String image, String playlistId) {
+    public Artist(String id, String name, String thumbnail, String playlistId) {
         this.id = id;
         this.name = name;
-        this.image = image;
+        this.thumbnail = thumbnail;
         this.playlistId = playlistId;
     }
 
-    public Artist(String id, String name, String image, String bio, String createdDate) {
+    public Artist(String id, String name, String thumbnail, String bio, String createdDate) {
         this.id = id;
         this.name = name;
-        this.image = image;
+        this.thumbnail = thumbnail;
         this.bio = bio;
         this.createdDate = createdDate;
     }
@@ -64,12 +68,12 @@ public class Artist implements Serializable {
         this.bio = bio;
     }
 
-    public String getImage() {
-        return image;
+    public String getThumbnail() {
+        return thumbnail;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 
     public String getCreatedDate() {
@@ -94,9 +98,20 @@ public class Artist implements Serializable {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", bio='" + bio + '\'' +
-                ", image='" + image + '\'' +
+                ", thumbnail='" + thumbnail + '\'' +
                 ", createdDate='" + createdDate + '\'' +
                 ", playlistId='" + playlistId + '\'' +
                 '}';
+    }
+
+    @Exclude
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+
+        result.put("name", name);
+        result.put("thumbnail", thumbnail);
+        result.put("playlistId", playlistId);
+
+        return result;
     }
 }
