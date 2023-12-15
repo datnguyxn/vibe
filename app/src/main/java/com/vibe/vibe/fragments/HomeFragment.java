@@ -18,7 +18,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.vibe.vibe.R;
 import com.vibe.vibe.adapters.DiscoverAdapter;
@@ -60,7 +59,7 @@ public class HomeFragment extends Fragment {
     private final AlbumModel albumModel = new AlbumModel();
     private final PlaylistModel playlistModel = new PlaylistModel();
     private final UserModel userModel = new UserModel();
-    private final ArtistModel artistModel = new ArtistModel();
+    private  ArtistModel artistModel = ArtistModel.getInstance();
 
     public HomeFragment() {
         // Required empty public constructor

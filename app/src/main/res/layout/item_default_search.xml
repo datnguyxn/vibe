@@ -1,40 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/libPlaylistItem"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="74dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/playlist"
-        android:id="@+id/ivSearch" />
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imvPlaylist"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="10dp"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/rounded4dpImageView"
+        app:srcCompat="@drawable/profile_pic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tvPlaylistName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_gravity="center"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp">
-        <TextView
-            android:id="@+id/tvResult"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/_10dp"
-            android:text="Ten bai hat"
-            android:textColor="@color/FlatWhite"
-            android:textSize="@dimen/_20sp"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tvTitle"
+        app:layout_constraintStart_toEndOf="@id/imvPlaylist"
+        app:layout_constraintVertical_chainStyle="packed"
+        android:textStyle="bold"
+        tools:text="Playlist Name"
+        android:textSize="16sp"
+        android:ellipsize="end"
+        android:textColor="@color/FlatWhite"
+        android:maxLines="1"
+        android:layout_marginStart="12dp"/>
 
-        <TextView
-            android:id="@+id/tvGenreResult"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Song"
-            android:textColor="@color/FlatWhite"
-            android:textSize="@dimen/_20sp"/>
-    </LinearLayout>
-
-</LinearLayout>
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/FlatWhite"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tvPlaylistName"
+        app:layout_constraintTop_toBottomOf="@id/tvPlaylistName"
+        tools:text="My playlist" />
+</androidx.constraintlayout.widget.ConstraintLayout>

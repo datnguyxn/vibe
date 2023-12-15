@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
+    android:paddingBottom="70dp"
     tools:context=".fragments.SearchFragment">
 
     <TextView
@@ -41,9 +42,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_10dp"
+        android:scrollbars="vertical"
+        android:paddingBottom="@dimen/_100dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtSearchLayout"
-        >
+        app:layout_constraintTop_toBottomOf="@+id/edtSearchLayout">
 
     </androidx.recyclerview.widget.RecyclerView>
 

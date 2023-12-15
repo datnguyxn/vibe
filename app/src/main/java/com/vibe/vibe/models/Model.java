@@ -13,10 +13,9 @@ public class Model {
     protected StorageReference storageRef;
 
     public Model() {
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance().getReference();
-//        database.keepSynced(true);
+        database.keepSynced(true);
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
     }

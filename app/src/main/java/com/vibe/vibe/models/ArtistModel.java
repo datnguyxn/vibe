@@ -24,7 +24,7 @@ public class ArtistModel extends Model{
     private static ArtistModel instance = null;
     public interface SearchArtistListener {
         void onBeginSearch();
-        void onSearchComplete(List<Object> artists);
+        void onSearchComplete(ArrayList<Object> artists);
         void onArtistAdded(Object artist);
         void onSearchError(String error);
     }

@@ -1,6 +1,7 @@
 package com.vibe.vibe.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.vibe.vibe.R;
+import com.vibe.vibe.entities.Album;
 import com.vibe.vibe.entities.Artist;
 import com.vibe.vibe.entities.Playlist;
 import com.vibe.vibe.entities.Song;
@@ -40,6 +42,16 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         notifyDataSetChanged();
     }
 
+
+    public void addResults(ArrayList<Object> results) {
+        this.results.addAll(results);
+        notifyDataSetChanged();
+    }
+
+    public void clearResults() {
+        this.results.clear();
+        notifyDataSetChanged();
+    }
     @Override
     public int getItemViewType(int position) {
         Object item = results.get(position);
@@ -47,7 +59,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             return TYPE_ARTIST;
         } else if (item instanceof Song) {
             return TYPE_SONG;
-        } else if (item instanceof Playlist) {
+        } else if (item instanceof Album) {
             return TYPE_PLAYLIST;
         }
 
@@ -76,6 +88,26 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return viewHolder;
     }
 
+    public void orderByType() {
+        ArrayList<Object> artists = new ArrayList<>();
+        ArrayList<Object> songs = new ArrayList<>();
+        ArrayList<Object> playlists = new ArrayList<>();
+        for (Object item : results) {
+            if (item instanceof Artist) {
+                artists.add(item);
+            } else if (item instanceof Song) {
+                songs.add(item);
+            } else if (item instanceof Album) {
+                playlists.add(item);
+            }
+        }
+        results.clear();
+        results.addAll(artists);
+        results.addAll(songs);
+        results.addAll(playlists);
+        notifyDataSetChanged();
+    }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Object item = results.get(position);
@@ -88,10 +120,20 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 searchArtistViewHolder.tvTitle.setText("Artists");
                 break;
             case TYPE_SONG:
+                SearchDefaultViewHolder searchSongViewHolder = (SearchDefaultViewHolder) holder;
+                Song song = (Song) item;
+                Log.e(TAG, "onBindViewHolder: " + song.toString());
+                searchSongViewHolder.tvPlaylistName.setText(song.getName());
+                Glide.with(context).load(song.getImageResource()).into(searchSongViewHolder.imvPlaylist);
+                searchSongViewHolder.tvTitle.setText("Songs");
+                break;
             case TYPE_PLAYLIST:
-            case TYPE_DEFAULT:
                 SearchDefaultViewHolder searchDefaultViewHolder = (SearchDefaultViewHolder) holder;
-                searchDefaultViewHolder.tvResult.setText(item.toString());
+                Album album = (Album) item;
+                Log.e(TAG, "onBindViewHolder: " + album.toString());
+                searchDefaultViewHolder.tvPlaylistName.setText(album.getName());
+                Glide.with(context).load(album.getImage()).into(searchDefaultViewHolder.imvPlaylist);
+                searchDefaultViewHolder.tvTitle.setText("Albums");
                 break;
         }
     }
@@ -104,13 +146,13 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public static class SearchDefaultViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView ivSearch;
-        private TextView tvResult, tvGenreResult;
+        private ImageView imvPlaylist;
+        private TextView tvPlaylistName, tvTitle;
         public SearchDefaultViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivSearch = itemView.findViewById(R.id.ivSearch);
-            tvResult = itemView.findViewById(R.id.tvResult);
-            tvGenreResult = itemView.findViewById(R.id.tvGenreResult);
+            imvPlaylist = itemView.findViewById(R.id.imvPlaylist);
+            tvPlaylistName = itemView.findViewById(R.id.tvPlaylistName);
+            tvTitle = itemView.findViewById(R.id.tvTitle);
         }
     }
 
