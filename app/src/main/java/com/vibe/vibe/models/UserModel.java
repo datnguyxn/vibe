@@ -29,6 +29,10 @@ public class UserModel extends Model {
     private final PlaylistModel playlistModel = new PlaylistModel();
     private final String USERS_COLLECTION = "users";
 
+    public interface onGetUserListener {
+        void onGetUserSuccess(User user);
+        void onGetUserFailure(String error);
+    }
     public interface UserCallBacks {
         void onCallback(User user);
     }
@@ -202,5 +206,24 @@ public class UserModel extends Model {
                         Log.e(TAG, "onFailure: " + e.getMessage());
                     }
                 });
+    }
+    public void getUser(String uid, onGetUserListener listener) {
+        database.child(USERS_COLLECTION).child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                User user = snapshot.getValue(User.class);
+
+                if (user != null) {
+                    listener.onGetUserSuccess(user);
+                } else {
+                    listener.onGetUserFailure("User not found");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                listener.onGetUserFailure(error.getMessage());
+            }
+        });
     }
 }
