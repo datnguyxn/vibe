@@ -91,7 +91,8 @@ public class PlayerFragment extends Fragment {
                 HomeFragment homeFragment = new HomeFragment();
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.setCustomAnimations(R.anim.slide_down, 0, 0, R.anim.slide_down);
+                fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+                fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.replace(R.id.frameLayout, homeFragment);
                 fragmentTransaction.commit();
                 showNavigationViews();

@@ -33,7 +33,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
-        android:hardwareAccelerated="false"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
@@ -67,12 +67,7 @@
         <activity
             android:name=".authentication.LoginActivity"
             android:exported="false" />
-        <receiver android:name=".broadcast.UpdateUIReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.AIRPLANE_MODE"/>
-            </intent-filter>
-        </receiver>
+        <service android:name=".services.SongService" />
         <receiver android:name=".broadcast.SongReceiver"
             android:exported="false">
             <intent-filter>

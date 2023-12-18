@@ -9,7 +9,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class MainApplication extends Application {
     private static final String TAG = MainApplication.class.getSimpleName();
-    private static final String CHANNEL_ID = "Vibe";
+    public static final String CHANNEL_ID = "Vibe";
 
     @Override
     public void onCreate() {

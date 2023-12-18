@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.vibe.vibe.R;
 import com.vibe.vibe.entities.Album;
 import com.vibe.vibe.entities.Playlist;
@@ -19,19 +20,19 @@ import java.util.ArrayList;
 
 public class RandomPlaylistsAdapter extends RecyclerView.Adapter<RandomPlaylistsAdapter.RandomPlaylistsAdapterHolder>{
     private static final String TAG = RandomPlaylistsAdapter.class.getSimpleName();
-    private ArrayList<Playlist> playlists;
+    private ArrayList<Album> albums;
     private Context context;
 
     public RandomPlaylistsAdapter(Context context) {
         this.context = context;
-        this.playlists = new ArrayList<>();
+        this.albums = new ArrayList<>();
     }
-    public void setPlaylists(ArrayList<Playlist> playlists) {
-        this.playlists = playlists;
+    public void setPlaylists(ArrayList<Album> playlists) {
+        this.albums = playlists;
         notifyDataSetChanged();
     }
     public void clearData() {
-        this.playlists.clear();
+        this.albums.clear();
         notifyDataSetChanged();
     }
     @NonNull
@@ -43,14 +44,18 @@ public class RandomPlaylistsAdapter extends RecyclerView.Adapter<RandomPlaylists
 
     @Override
     public void onBindViewHolder(@NonNull RandomPlaylistsAdapter.RandomPlaylistsAdapterHolder holder, int position) {
-        Playlist playlist = playlists.get(position);
-        holder.tvItemName.setText(playlist.getPlaylistName());
-        holder.ivItem.setImageURI(Uri.parse(playlist.getImage()));
+//        Playlist playlist = playlists.get(position);
+//        holder.tvItemName.setText(playlist.getPlaylistName());
+//        holder.ivItem.setImageURI(Uri.parse(playlist.getImage()));
+        Album album = albums.get(position);
+        holder.tvItemName.setText(album.getName());
+        Glide.with(context).load(album.getImage()).into(holder.ivItem);
+
     }
 
     @Override
     public int getItemCount() {
-        return playlists.size();
+        return albums.size();
     }
 
     public static class RandomPlaylistsAdapterHolder extends RecyclerView.ViewHolder {
@@ -60,7 +65,7 @@ public class RandomPlaylistsAdapter extends RecyclerView.Adapter<RandomPlaylists
             super(itemView);
             ivItem = itemView.findViewById(R.id.ivItem);
             tvItemName = itemView.findViewById(R.id.tvItemName);
-            tvItemArtist = itemView.findViewById(R.id.tvItemArtist);
+//            tvItemArtist = itemView.findViewById(R.id.tvItemArtist);
         }
     }
 }

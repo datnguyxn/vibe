@@ -27,6 +27,7 @@
             android:layout_gravity="center"/>
 
         <TextView
+            android:id="@+id/tvSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Save"
@@ -54,7 +55,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/add_to_playlist"
+        android:src="@drawable/baseline_photo_camera_24"
         app:layout_constraintBottom_toBottomOf="@id/ivAvatarProfile"
         app:layout_constraintEnd_toEndOf="@id/ivAvatarProfile"
         android:padding="@dimen/_4dp"
@@ -78,6 +79,7 @@
                 android:id="@+id/etUserName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/FlatWhite"
                 android:hint="Name" />
 
         </com.google.android.material.textfield.TextInputLayout>

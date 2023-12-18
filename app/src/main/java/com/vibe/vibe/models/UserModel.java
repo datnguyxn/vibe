@@ -226,4 +226,17 @@ public class UserModel extends Model {
             }
         });
     }
+
+    public void updateAvatar(String uid, String avatar) {
+        Log.e(TAG, "updateAvatar: " + avatar);
+        database.child(USERS_COLLECTION).child(uid).child("avatar").setValue(avatar)
+                .addOnCompleteListener(task -> Log.e(TAG, "onComplete: update avatar successfully"))
+                .addOnFailureListener(e -> Log.e(TAG, "onFailure: " + e.getMessage()));
+    }
+
+    public void updateUsername(String uid, String username) {
+        database.child(USERS_COLLECTION).child(uid).child("username").setValue(username)
+                .addOnCompleteListener(task -> Log.e(TAG, "onComplete: update username successfully"))
+                .addOnFailureListener(e -> Log.e(TAG, "onFailure: " + e.getMessage()));
+    }
 }
