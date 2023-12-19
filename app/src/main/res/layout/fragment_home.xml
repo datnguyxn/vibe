@@ -28,7 +28,6 @@
                 android:id="@+id/tvHello"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/bonjour"
                 android:textColor="#F5F5FA"
                 android:textSize="@dimen/_20sp" />
 
@@ -62,7 +61,6 @@
                 android:id="@+id/ivProfileArtist"
                 android:layout_width="@dimen/_80dp"
                 android:layout_height="@dimen/_80dp"
-                android:src="@drawable/artist"
                 app:shapeAppearanceOverlay="@style/circleImageView"
                 app:strokeWidth="@dimen/_1dp" />
 
@@ -88,7 +86,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
-                    android:text="Dean Lewis"
                     android:textColor="#F5F5FA"
                     android:textSize="@dimen/_24sp" />
             </LinearLayout>
@@ -104,9 +101,8 @@
 
             <ImageView
                 android:id="@+id/ivAlbum"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/album" />
+                android:layout_width="150dp"
+                android:layout_height="150dp"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -119,7 +115,6 @@
                     android:id="@+id/tvAlbum"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Hurtless (Acoustic)"
                     android:textColor="#F5F5FA"
                     android:textSize="@dimen/_20sp" />
 
@@ -128,7 +123,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-thin"
-                    android:text="Single • Dean Lewis"
                     android:textColor="#DDDDDD" />
             </LinearLayout>
 
@@ -154,7 +148,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_marginRight="16dp"
-                    android:src="@drawable/play" />
+                    android:src="@drawable/property_1_play" />
             </RelativeLayout>
         </RelativeLayout>
 
@@ -163,8 +157,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:layout_marginTop="296dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/rl_1" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/ll_3"

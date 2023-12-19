@@ -14,10 +14,15 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.vibe.vibe.R;
+import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.entities.Song;
+
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -87,14 +92,27 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_more_option_bottom_sheet, container, false);
+        View view = inflater.inflate(R.layout.fragment_more_option_bottom_sheet, container, false);
+        init(view);
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            Song song = (Song) bundle.getSerializable(Application.CURRENT_SONG);
+            boolean isLiked = bundle.getBoolean("Like");
+            assert song != null;
+            Glide.with(requireContext()).load(song.getImageResource()).into(ivMorePicture);
+            tvMoreSong.setText(song.getName());
+            tvMoreArtist.setText(song.getArtistName());
+            if (isLiked) {
+                tvLikeArtist.setCompoundDrawablesWithIntrinsicBounds(R.drawable.unlike, 0, 0, 0);
+            } else {
+                tvLikeArtist.setCompoundDrawablesWithIntrinsicBounds(R.drawable.like, 0, 0, 0);
+            }
+        }
+
+        return view;
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        init(view);
-    }
 
     private void init(View view) {
             ivMorePicture = view.findViewById(R.id.ivMorePicture);

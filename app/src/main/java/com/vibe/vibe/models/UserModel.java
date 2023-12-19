@@ -14,12 +14,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.constants.Schema;
 import com.vibe.vibe.entities.User;
 import com.vibe.vibe.utils.HashPassword;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +62,11 @@ public class UserModel extends Model {
         void onCompleted(User user);
 
         void onFailure();
+    }
+
+    public interface OnAddConfigurationListener {
+        void onAddConfigurationSuccess();
+        void onAddConfigurationFailure(String error);
     }
 
     public UserModel() {
@@ -238,5 +246,56 @@ public class UserModel extends Model {
         database.child(USERS_COLLECTION).child(uid).child("username").setValue(username)
                 .addOnCompleteListener(task -> Log.e(TAG, "onComplete: update username successfully"))
                 .addOnFailureListener(e -> Log.e(TAG, "onFailure: " + e.getMessage()));
+    }
+
+    public void addConfiguration(String uid, String key, ArrayList<Map<String, Object>> values, OnAddConfigurationListener listener) {
+        Query query = database.child(USERS_COLLECTION).child(uid).child(Schema.CONFIGURATION).child(key);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    database.child(USERS_COLLECTION).child(uid).child(Schema.CONFIGURATION).child(key).removeValue();
+                    database.child(USERS_COLLECTION).child(uid).child(Schema.CONFIGURATION).child(key).setValue(values);
+                }else {
+                    database.child(USERS_COLLECTION).child(uid).child(Schema.CONFIGURATION).child(key).setValue(values);
+                }
+                listener.onAddConfigurationSuccess();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: error occur " + error.toString());
+                listener.onAddConfigurationFailure(error.getMessage());
+            }
+        });
+    }
+
+    public void getConfiguration(String uid, String key, onGetConfigListener listener) {
+        Query query = database.child(USERS_COLLECTION).child(uid).child(Schema.CONFIGURATION).child(key);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Object values = snapshot.getValue();
+                    List<Map<String, Object>> list = new ArrayList<>();
+                    if (values instanceof List) {
+                        for (Object object : (List) values) {
+                            if (object instanceof Map) {
+                                list.add((Map<String, Object>) object);
+                            }
+                        }
+                    }
+                    listener.onCompleted(list);
+                } else {
+                    listener.onCompleted(null);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: error occur " + error.toString());
+                listener.onFailure();
+            }
+        });
     }
 }

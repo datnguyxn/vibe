@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -35,9 +36,15 @@ public class SongModel extends Model {
     }
 
     public void find(String id, OnSongFindListener listener) {
-        storageRef.child(id + "mp3").getDownloadUrl().addOnSuccessListener(uri -> {
-            listener.onSongFind(uri);
+        Log.d(TAG, "find: " + id + ".mp3");
+        storageRef.child(id + ".mp3").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Log.d(TAG, "onSuccess: " + uri.toString());
+                listener.onSongFind(uri);
+            }
         }).addOnFailureListener(e -> {
+            Log.e(TAG, "find: ", e);
             listener.onSongNotExist();
         });
     }

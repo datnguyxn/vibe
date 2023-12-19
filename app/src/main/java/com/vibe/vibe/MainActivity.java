@@ -1,6 +1,7 @@
 package com.vibe.vibe;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -11,6 +12,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -28,7 +30,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -37,6 +41,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.vibe.vibe.authentication.LoginActivity;
 import com.vibe.vibe.constants.Action;
 import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.constants.Schema;
 import com.vibe.vibe.entities.Song;
 import com.vibe.vibe.fragments.AboutUsFragment;
 import com.vibe.vibe.fragments.BarCodeFragment;
@@ -45,10 +50,13 @@ import com.vibe.vibe.fragments.LibraryFragment;
 import com.vibe.vibe.fragments.PlayerFragment;
 import com.vibe.vibe.fragments.SearchFragment;
 import com.vibe.vibe.fragments.SettingFragment;
+import com.vibe.vibe.models.UserModel;
 import com.vibe.vibe.services.SongService;
 import com.vibe.vibe.utils.MainActivityListener;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements MainActivityListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -60,22 +68,45 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
     private TextView tvNameSong, tvNameArtist;
     private CardView bottomCurrentSong;
     private View fragment;
-    private Bundle bundle;
     private FirebaseAuth mAuth;
     private boolean isPlaying = false;
     private boolean isNowPlaying = false;
     private boolean isShuffle = false;
     private boolean isRepeat = false;
+    private boolean isLiked = false;
     private int seekTo = 0;
     private int index;
-
+    private final UserModel userModel = new UserModel();
     private ArrayList<Song> songs;
-    private Song song;
+    private Song currentSong;
+    private int action;
+    private String uid;
     private static final int REQUEST_CODE = 100;
     private BroadcastReceiver onReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle == null) return;
+            if (bundle.containsKey(Application.CURRENT_SONG)) {
+                currentSong = (Song) bundle.getSerializable(Application.CURRENT_SONG);
+                songs = (ArrayList<Song>) bundle.getSerializable(Application.SONGS_ARG);
+                index = bundle.getInt(Application.SONG_INDEX);
 
+                seekTo = bundle.getInt(Application.SEEK_BAR_PROGRESS, 0);
+                isPlaying = bundle.getBoolean(Application.IS_PLAYING);
+                isNowPlaying = bundle.getBoolean(Application.IN_NOW_PLAYING);
+                isShuffle = bundle.getBoolean(Application.IS_SHUFFLE, false);
+                isRepeat = bundle.getBoolean(Application.IS_REPEAT, false);
+
+                action = bundle.getInt(Application.ACTION_TYPE);
+                Log.e(TAG, "onReceive: action: " + action + " " + currentSong.getName() + " isPlaying: " + isPlaying + "; isNowPlaying: " + isNowPlaying + "; isShuffle: " + isShuffle + "; isRepeat: " + isRepeat);
+                if (songs != null) {
+                    Log.e(TAG, "onReceive: songs size: " + songs.size());
+                } else {
+                    Log.e(TAG, "onReceive: songs is empty 🫶");
+                }
+                handlePlayCurrentSongBehavior(action);
+            }
         }
     };
 
@@ -83,11 +114,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        LocalBroadcastManager.getInstance(this).registerReceiver(onReceiver, SongService.getIntentFilter());
         init();
         handlePermissionForActivity();
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+        bottomCurrentSong.setVisibility(View.GONE);
 
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -153,7 +186,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
             }
         });
         handleBottomBehavior();
-        handleBottomNavigation();
     }
 
     private void clearBottomMenuIcon() {
@@ -175,6 +207,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
         tvNameSong = findViewById(R.id.tvNameSong);
         tvNameArtist = findViewById(R.id.tvNameArtist);
         mAuth = FirebaseAuth.getInstance();
+        SharedPreferences sharedPreferences = getSharedPreferences(Application.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+        uid = sharedPreferences.getString(Application.SHARED_PREFERENCES_UUID, "");
     }
 
     private void replaceFragment(Fragment fragment) {
@@ -185,6 +219,23 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
     }
 
     private void handleBottomBehavior() {
+        imgPause.setOnClickListener(v -> {
+            Log.d(TAG, "handleBottomNavigation: " + isPlaying);
+            if (isPlaying) {
+                sendBroadcastToService(Action.ACTION_PAUSE);
+            } else {
+                sendBroadcastToService(Action.ACTION_PLAY);
+            }
+        });
+        imgUnLike.setOnClickListener(v -> {
+            if (isLiked) {
+                imgUnLike.setImageResource(R.drawable.unlike);
+                isLiked = false;
+            } else {
+                imgUnLike.setImageResource(R.drawable.like);
+                isLiked = true;
+            }
+        });
         bottomCurrentSong.setOnClickListener(v -> {
             // Corrected code
 //            LinearLayout.LayoutParams correctLayoutParams = (LinearLayout.LayoutParams) fragment.getLayoutParams();
@@ -197,11 +248,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             Bundle bundle = new Bundle();
             bundle.putSerializable(Application.SONGS_ARG, songs);
-            bundle.putSerializable(Application.CURRENT_SONG, song);
+            bundle.putSerializable(Application.CURRENT_SONG, currentSong);
             bundle.putInt(Application.SONG_INDEX, index);
             bundle.putBoolean(Application.IS_SHUFFLE, isShuffle);
             bundle.putBoolean(Application.IS_REPEAT, isRepeat);
             bundle.putInt(Application.SEEK_BAR_PROGRESS, seekTo);
+            bundle.putBoolean(Application.IS_PLAYING, isPlaying);
+            Log.e(TAG, "handleBottomBehavior: " + isPlaying);
             fragment.setArguments(bundle);
             transaction.setCustomAnimations(R.anim.slide_up, 0, 0, R.anim.slide_up);
             transaction.replace(R.id.frameLayout, fragment);
@@ -236,23 +289,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
         }
     }
 
-    private void handleBottomNavigation() {
-        imgPause.setOnClickListener(v -> {
-            Log.d(TAG, "handleBottomNavigation: " + isPlaying);
-            if (isPlaying) {
-                sendBroadcastToService(Action.ACTION_PAUSE);
-            } else {
-                sendBroadcastToService(Action.ACTION_PLAY);
-            }
-        });
-    }
 
     private void sendBroadcastToService(int action) {
         Intent intent = new Intent(this, SongService.class);
         intent.putExtra(Application.ACTION_TYPE, action);
         Bundle bundle = new Bundle();
         bundle.putSerializable(Application.SONGS_ARG, songs);
-        bundle.putSerializable(Application.CURRENT_SONG, song);
+        bundle.putSerializable(Application.CURRENT_SONG, currentSong);
         bundle.putInt(Application.SONG_INDEX, index);
         bundle.putBoolean(Application.IS_SHUFFLE, isShuffle);
         bundle.putBoolean(Application.IS_REPEAT, isRepeat);
@@ -262,4 +305,91 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
         startService(intent);
     }
 
+    private void handlePlayCurrentSongBehavior(int action) {
+        switch (action) {
+            case Action.ACTION_PLAY:
+                updateBottomCurrentSong();
+            case Action.ACTION_START:
+                Log.e(TAG, "handlePlayCurrentSongBehavior: " + action);
+//                bottomCurrentSong.setVisibility(View.VISIBLE);
+                updateBottomCurrentSong();
+                break;
+            case Action.ACTION_PAUSE:
+            case Action.ACTION_RESUME:
+                Log.e(TAG, "handlePlayCurrentSongBehavior: " + action);
+                updateStatusCurrentSong();
+                break;
+        }
+    }
+
+    private void updateBottomCurrentSong() {
+        Log.e(TAG, "updateBottomCurrentSong: " + currentSong.getName());
+        if (currentSong != null && !isNowPlaying) {
+            bottomCurrentSong.setVisibility(View.VISIBLE);
+            tvNameSong.setText(currentSong.getName());
+            tvNameArtist.setText(currentSong.getArtistName());
+            if (currentSong.getImageResource() != null) {
+                Glide.with(this).load(currentSong.getImageResource()).into(imgSong);
+            } else {
+                Glide.with(this).load(R.drawable.current_song).into(imgSong);
+            }
+        } else {
+            bottomCurrentSong.setVisibility(View.GONE);
+        }
+        updateStatusCurrentSong();
+    }
+
+    private void updateStatusCurrentSong() {
+        if (isPlaying) {
+            imgPause.setImageResource(R.drawable.pause_no_color);
+        } else {
+            imgPause.setImageResource(R.drawable.play_no_color);
+        }
+
+        checkSongAddedToFavorite();
+        if (isLiked) {
+            imgUnLike.setImageResource(R.drawable.like);
+        } else {
+            imgUnLike.setImageResource(R.drawable.unlike);
+        }
+    }
+
+    private void checkSongAddedToFavorite() {
+        userModel.getConfiguration(uid, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(List<Map<String, Object>> config) {
+                if (config == null) {
+                    return;
+                } else {
+                    for (Map<String, Object> map : config) {
+                        if (map.get(Schema.SONG_ID).equals(currentSong.getId())) {
+                            isLiked = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure() {
+                Log.d(TAG, "onFailure: ");
+            }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if ((requestCode == REQUEST_CODE) && (grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+            Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
+//            refund to to main activity again
+            handleBottomBehavior();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(onReceiver);
+    }
 }

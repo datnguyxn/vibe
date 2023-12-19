@@ -9,6 +9,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.vibe.vibe.entities.Album;
 import com.vibe.vibe.entities.Topic;
+import com.vibe.vibe.utils.RandomValue;
 
 import org.json.JSONObject;
 

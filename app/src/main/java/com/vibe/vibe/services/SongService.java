@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.ServiceCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.bumptech.glide.Glide;
@@ -78,6 +79,7 @@ public class SongService extends Service {
         Bundle bundle = intent.getExtras();
         if (bundle != null) {
             songs = (ArrayList<Song>) bundle.getSerializable(Application.SONGS_ARG);
+            Log.e(TAG, "onStartCommand: handle song service: " + songs.get(0).toString());
             if (songs != null) {
                 index = bundle.getInt(Application.SONG_INDEX);
                 isNowPlaying = bundle.getBoolean(Application.IN_NOW_PLAYING);
@@ -94,7 +96,7 @@ public class SongService extends Service {
             Log.e(TAG, "onStartCommand: handle action: " + action);
             handleAction(action);
         }
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     private void handleAction(int action) {
@@ -258,7 +260,7 @@ public class SongService extends Service {
                     public void onSongNotExist() {
                         Log.e(TAG, "onSongNotExist: ");
                         Toast.makeText(SongService.this, "Song not exist", Toast.LENGTH_SHORT).show();
-                        next();
+//                        next();LENGTH_SHORT
                     }
                 });
             } else {
@@ -290,6 +292,7 @@ public class SongService extends Service {
 
     private void sendNotification() {
         Intent intent = new Intent();
+        Log.e(TAG, "sendNotification: " + song.toString() + index + isPlaying);
         intent.putExtra(Application.SONG_INDEX, index);
         intent.putExtra(Application.SONGS_ARG, songs);
         intent.putExtra(Application.IN_NOW_PLAYING, true);
@@ -353,18 +356,19 @@ public class SongService extends Service {
         if (isPlaying) {
             notificationCompat
                     .addAction(R.drawable.previous, "Previous", getPendingIntent(this, Action.ACTION_PREVIOUS))
-                    .addAction(R.drawable.pause, "Pause", getPendingIntent(this, Action.ACTION_PAUSE))
+                    .addAction(R.drawable.pause_no_color, "Pause", getPendingIntent(this, Action.ACTION_PAUSE))
                     .addAction(R.drawable.next, "Next", getPendingIntent(this, Action.ACTION_NEXT));
         } else {
             notificationCompat
                     .addAction(R.drawable.previous, "Previous", getPendingIntent(this, Action.ACTION_PREVIOUS))
-                    .addAction(R.drawable.play, "Play", getPendingIntent(this, Action.ACTION_PLAY))
+                    .addAction(R.drawable.play_no_color, "Play", getPendingIntent(this, Action.ACTION_PLAY))
                     .addAction(R.drawable.next, "Next", getPendingIntent(this, Action.ACTION_NEXT));
         }
         notificationCompat.addAction(R.drawable.baseline_clear_24, "Close", getPendingIntent(this, Action.ACTION_CLOSE));
 
         Notification notification = notificationCompat.build();
 
+//        startForeground(1, notification);
         startForeground(1, notification);
     }
 

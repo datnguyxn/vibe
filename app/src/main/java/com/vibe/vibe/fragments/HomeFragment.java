@@ -1,11 +1,15 @@
 package com.vibe.vibe.fragments;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,17 +23,22 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.vibe.vibe.MainActivity;
 import com.vibe.vibe.R;
 import com.vibe.vibe.adapters.DiscoverAdapter;
 import com.vibe.vibe.adapters.RandomPlaylistsAdapter;
 import com.vibe.vibe.adapters.RecentlySongsAdapter;
+import com.vibe.vibe.constants.Action;
 import com.vibe.vibe.constants.Application;
 import com.vibe.vibe.entities.Album;
+import com.vibe.vibe.entities.Song;
 import com.vibe.vibe.entities.Topic;
 import com.vibe.vibe.entities.User;
 import com.vibe.vibe.models.AlbumModel;
@@ -37,7 +46,9 @@ import com.vibe.vibe.models.ArtistModel;
 import com.vibe.vibe.models.PlaylistModel;
 import com.vibe.vibe.models.TopicModel;
 import com.vibe.vibe.models.UserModel;
+import com.vibe.vibe.services.SongService;
 import com.vibe.vibe.utils.GreetingUtil;
+import com.vibe.vibe.utils.RandomValue;
 
 import org.checkerframework.checker.units.qual.A;
 
@@ -61,7 +72,7 @@ public class HomeFragment extends Fragment {
     private static final String TAG = HomeFragment.class.getSimpleName();
     private ScrollView fragmentHome;
     private ConstraintLayout constraintLayout;
-    private TextView tvHello, tvName, tvAlbum, textViewSubtitle, tvDiscover, tvRecentSongs, tvRandomPlaylists;
+    private TextView tvHello, tvName, tvDetail, tvAlbum, textViewSubtitle, tvDiscover, tvRecentSongs, tvRandomPlaylists;
     private ImageView ivNotification, ivSettings, ivAlbum, ivLike, ivPlay;
     private ShapeableImageView ivProfileArtist;
     private RecyclerView rvDiscover, rvRecentSongs, rvRandomPlaylists;
@@ -77,6 +88,25 @@ public class HomeFragment extends Fragment {
     private final TopicModel topicModel = new TopicModel();
     private ProgressBar progressBar;
     private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private Song song;
+    private boolean isPlaying = false;
+    private boolean isShuffle = false;
+    private boolean isRepeat = false;
+    private BroadcastReceiver onReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                isPlaying = bundle.getBoolean(Application.IS_PLAYING);
+                isShuffle = bundle.getBoolean(Application.IS_SHUFFLE, false);
+                isRepeat = bundle.getBoolean(Application.IS_REPEAT, false);
+
+                int action = bundle.getInt(Application.ACTION_TYPE);
+                Log.e(TAG, "onReceiveHomeFragment: receiver " + action + " " + isPlaying + " isShuffle: " + isShuffle + " isRepeat: " + isRepeat);
+                handleActionReceiveForHome(action);
+            }
+        }
+    };
 
     public HomeFragment() {
         // Required empty public constructor
@@ -115,6 +145,7 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         init(view);
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(onReceiver, SongService.getIntentFilter());
         fragmentHome = new ScrollView(getContext());
         constraintLayout = new ConstraintLayout(getContext());
         fragmentHome.addView(constraintLayout);
@@ -127,9 +158,24 @@ public class HomeFragment extends Fragment {
         randomPlaylistsAdapter = new RandomPlaylistsAdapter(getContext());
         rvRandomPlaylists.setAdapter(randomPlaylistsAdapter);
         progressBar.setVisibility(View.VISIBLE);
+        tvHello.setVisibility(View.GONE);
+        tvName.setVisibility(View.GONE);
+        tvDiscover.setVisibility(View.GONE);
+        tvRecentSongs.setVisibility(View.GONE);
+        tvRandomPlaylists.setVisibility(View.GONE);
+        ivNotification.setVisibility(View.GONE);
+        ivSettings.setVisibility(View.GONE);
+        ivAlbum.setVisibility(View.GONE);
+        ivLike.setVisibility(View.GONE);
+        ivPlay.setVisibility(View.GONE);
+        ivProfileArtist.setVisibility(View.GONE);
+        tvAlbum.setVisibility(View.GONE);
+        textViewSubtitle.setVisibility(View.GONE);
+        tvDetail.setVisibility(View.GONE);
         tvHello.setText(GreetingUtil.getGreeting());
         getAllAlbums();
         getAllPlaylists();
+        handlePlayMusicClick();
         return view;
     }
 
@@ -144,6 +190,7 @@ public class HomeFragment extends Fragment {
         tvHello = view.findViewById(R.id.tvHello);
         tvName = view.findViewById(R.id.tvName);
         tvDiscover = view.findViewById(R.id.tvDiscover);
+        tvDetail = view.findViewById(R.id.tvDetail);
         tvRecentSongs = view.findViewById(R.id.tvRecentSongs);
         tvRandomPlaylists = view.findViewById(R.id.tvRandomPlaylists);
         ivNotification = view.findViewById(R.id.ivNotification);
@@ -152,14 +199,12 @@ public class HomeFragment extends Fragment {
         ivLike = view.findViewById(R.id.ivLike);
         ivPlay = view.findViewById(R.id.ivPlay);
         ivProfileArtist = view.findViewById(R.id.ivProfileArtist);
+        tvAlbum = view.findViewById(R.id.tvAlbum);
+        textViewSubtitle = view.findViewById(R.id.textViewSubtitle);
         rvDiscover = view.findViewById(R.id.rvDiscover);
         rvRecentSongs = view.findViewById(R.id.rvRecentSongs);
         rvRandomPlaylists = view.findViewById(R.id.rvRandomPlaylists);
-        tvAlbum = view.findViewById(R.id.tvAlbum);
-        textViewSubtitle = view.findViewById(R.id.textViewSubtitle);
         progressBar = view.findViewById(R.id.progressBarHome);
-        Animation fadeInAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.fade_in);
-        fragmentHome.startAnimation(fadeInAnimation);
     }
 
 
@@ -172,14 +217,17 @@ public class HomeFragment extends Fragment {
                     public void onCallback(ArrayList<Album> albumModels) {
                         discoverAdapter.setAlbums(albumModels);
                         albums.addAll(albumModels);
-                        progressBar.setVisibility(View.GONE);
+                        getAndRandomOneSongFromAlbum(albumModels);
+//                        progressBar.setVisibility(View.GONE);
+                        updateUI();
                     }
                 });
             }
         }, 500);
         if (!albums.isEmpty()) {
             discoverAdapter.setAlbums(albums);
-            progressBar.setVisibility(View.GONE);
+//            progressBar.setVisibility(View.GONE);
+            updateUI();
         }
     }
 
@@ -213,7 +261,9 @@ public class HomeFragment extends Fragment {
                         Log.e(TAG, "onTopicsChanged: " + topics.toString());
                         randomPlaylistsAdapter.setPlaylists(topics.get(0).getAlbums());
                         album.addAll(topics.get(0).getAlbums());
-                        progressBar.setVisibility(View.GONE);
+//                        progressBar.setVisibility(View.GONE);
+                        updateUI();
+//                        fragmentHome.setVisibility(View.VISIBLE);
                     }
 
                     @Override
@@ -225,7 +275,76 @@ public class HomeFragment extends Fragment {
         }, 500);
         if (!album.isEmpty()) {
             randomPlaylistsAdapter.setPlaylists(album);
-            progressBar.setVisibility(View.GONE);
+//            progressBar.setVisibility(View.GONE);
+            updateUI();
+//            fragmentHome.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void getAndRandomOneSongFromAlbum(ArrayList<Album> albums) {
+        ArrayList<Album> randomValues = RandomValue.getRandomValues(albums, 1);
+        Album album = randomValues.get(0);
+        song = RandomValue.getRandomValuesSong(album.getSongs(), 1);
+        Glide.with(getContext()).load(song.getImageResource()).into(ivProfileArtist);
+        tvName.setText(song.getName());
+        Glide.with(getContext()).load(album.getImage()).into(ivAlbum);
+        tvAlbum.setText(album.getName());
+        textViewSubtitle.setText(album.getDescription());
+    }
+
+    private void updateUI() {
+        progressBar.setVisibility(View.GONE);
+        tvHello.setVisibility(View.VISIBLE);
+        tvName.setVisibility(View.VISIBLE);
+        tvDiscover.setVisibility(View.VISIBLE);
+        tvRecentSongs.setVisibility(View.VISIBLE);
+        tvRandomPlaylists.setVisibility(View.VISIBLE);
+        ivNotification.setVisibility(View.VISIBLE);
+        ivSettings.setVisibility(View.VISIBLE);
+        ivAlbum.setVisibility(View.VISIBLE);
+        ivLike.setVisibility(View.VISIBLE);
+        ivPlay.setVisibility(View.VISIBLE);
+        ivProfileArtist.setVisibility(View.VISIBLE);
+        tvAlbum.setVisibility(View.VISIBLE);
+        textViewSubtitle.setVisibility(View.VISIBLE);
+        tvDetail.setVisibility(View.VISIBLE);
+    }
+
+    private void handlePlayMusicClick() {
+        ivPlay.setOnClickListener(v -> {
+            isPlaying = true;
+            Log.e(TAG, "handlePlayMusicClick: play music is clicked");
+            Intent intent = new Intent(getContext(), SongService.class);
+            Bundle bundle = new Bundle();
+            Log.e(TAG, "handlePlayMusicClick: " + song.toString());
+            ArrayList<Song> songs = new ArrayList<>();
+            songs.add(song);
+            bundle.putSerializable(Application.SONGS_ARG, songs);
+            if (isPlaying) {
+                intent.putExtra(Application.ACTION_TYPE, Action.ACTION_PLAY);
+            } else {
+                intent.putExtra(Application.ACTION_TYPE, Action.ACTION_PAUSE);
+            }
+
+            intent.putExtra(Application.SONG_INDEX, 0);
+            intent.putExtra(Application.IS_PLAYING, isPlaying);
+            intent.putExtras(bundle);
+            getContext().startService(intent);
+        });
+
+    }
+
+    private void handleActionReceiveForHome(int action) {
+        if (action == Action.ACTION_PLAY) {
+            Glide.with(getContext()).load(R.drawable.pause).into(ivPlay);
+        } else if (action == Action.ACTION_PAUSE) {
+            Glide.with(getContext()).load(R.drawable.play).into(ivPlay);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(onReceiver);
     }
 }
