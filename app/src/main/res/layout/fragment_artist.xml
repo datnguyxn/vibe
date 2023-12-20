@@ -37,19 +37,36 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
 
-        <TextView
-            android:id="@+id/playlist_name"
+        <LinearLayout
+            android:id="@+id/ll_artistName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:text="Harry Styles"
+            android:orientation="horizontal"
             android:paddingHorizontal="@dimen/_10dp"
-            android:textColor="@color/white"
-            android:textSize="@dimen/_30sp"
-            android:textStyle="bold"
+            android:layout_marginTop="15dp"
+            android:gravity="center_vertical"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/artist_thumb" />
+            app:layout_constraintTop_toBottomOf="@+id/artist_thumb">
+
+            <TextView
+                android:id="@+id/playlist_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Harry Styles"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_30sp"
+                android:textStyle="bold"
+                android:layout_weight="1"/>
+
+            <ImageView
+                android:id="@+id/ivLikeStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/like"
+                />
+        </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/ll_artistAlbums"
@@ -59,7 +76,7 @@
             android:paddingHorizontal="@dimen/_10dp"
             app:layout_constraintStart_toStartOf="parent"
             android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@+id/playlist_name">
+            app:layout_constraintTop_toBottomOf="@+id/ll_artistName">
 
             <TextView
                 android:layout_width="wrap_content"

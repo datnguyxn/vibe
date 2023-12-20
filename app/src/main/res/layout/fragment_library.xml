@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
-            android:background="@drawable/notification" />
+            android:background="@drawable/baseline_add_24" />
 
     </RelativeLayout>
 
@@ -58,6 +58,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rcvArtist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcvPlaylist"

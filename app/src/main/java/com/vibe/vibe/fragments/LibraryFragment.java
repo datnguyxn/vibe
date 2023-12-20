@@ -3,12 +3,25 @@ package com.vibe.vibe.fragments;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
+import com.vibe.vibe.adapters.LibraryAdapter;
+import com.vibe.vibe.entities.Album;
+import com.vibe.vibe.entities.User;
 import com.vibe.vibe.R;
+import com.vibe.vibe.models.AlbumModel;
+import com.vibe.vibe.models.ArtistModel;
+import com.vibe.vibe.models.PlaylistModel;
+import com.vibe.vibe.models.UserModel;
+
+import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,6 +38,13 @@ public class LibraryFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private static final String TAG = "LibraryFragment";
+    private ImageView ivAvatar;
+    private RecyclerView rcvPlaylist, rcvArtist;
+    private final PlaylistModel playlistModel = new PlaylistModel();
+    private final UserModel userModel = new UserModel();
+    private final ArtistModel artistModel = new ArtistModel();
 
     public LibraryFragment() {
         // Required empty public constructor
@@ -61,6 +81,22 @@ public class LibraryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_library, container, false);
+        View convertView = inflater.inflate(R.layout.fragment_library, container, false);
+        rcvPlaylist = convertView.findViewById(R.id.rcvPlaylist);
+        initPlaylist();
+        return convertView;
+    }
+
+    public void initPlaylist() {
+        RecyclerView.LayoutManager layoutManager;
+        layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        rcvPlaylist.setLayoutManager(layoutManager);
+
+        LibraryAdapter libraryAdapter = new LibraryAdapter(getContext());
+        rcvPlaylist.setAdapter(libraryAdapter);
+        getLibrary();
+    }
+    private void getLibrary() {
+        
     }
 }

@@ -28,7 +28,7 @@ public class ArtistModel extends Model{
         void onArtistAdded(Object artist);
         void onSearchError(String error);
     }
-    private ArtistModel() {
+    public ArtistModel() {
         super();
     }
 
