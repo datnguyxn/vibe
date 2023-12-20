@@ -167,6 +167,9 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             tvArtistName = itemView.findViewById(R.id.tvArtistName);
             tvTitle = itemView.findViewById(R.id.tvTitle);
 //            tvTitle.setText("Artists");
+            tvTitle.setOnClickListener(v -> {
+                Log.e(TAG, "SearchArtistViewHolder: " + tvTitle.getText().toString());
+            });
         }
     }
 }

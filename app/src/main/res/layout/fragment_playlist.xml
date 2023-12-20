@@ -57,7 +57,7 @@
             app:layout_constraintTop_toTopOf="@+id/blur_image" />
 
         <TextView
-            android:id="@+id/playlist_name"
+            android:id="@+id/playlistName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
@@ -80,7 +80,7 @@
             android:textStyle="normal"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/playlist_name" />
+            app:layout_constraintTop_toBottomOf="@+id/playlistName" />
 
         <!--    action -->
         <LinearLayout
@@ -146,7 +146,7 @@
                     android:id="@+id/play_playlist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/play"
+                    android:background="@drawable/property_1_play"
                     android:contentDescription="TODO"
                     app:tint="?attr/iconTintColor" />
             </LinearLayout>

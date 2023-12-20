@@ -67,7 +67,7 @@
                 android:layout_width="@dimen/_24dp"
                 android:layout_height="@dimen/_24dp"
                 android:layout_marginEnd="@dimen/_20dp"
-                android:src="@drawable/unlike"/>
+                android:src="@drawable/like"/>
 
             <ImageView
                 android:id="@+id/imgPause"

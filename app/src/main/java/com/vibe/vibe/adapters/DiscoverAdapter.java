@@ -6,14 +6,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.vibe.vibe.R;
 import com.vibe.vibe.entities.Album;
+import com.vibe.vibe.fragments.PlaylistFragment;
 
 import java.util.ArrayList;
 
@@ -49,6 +52,12 @@ public class DiscoverAdapter extends RecyclerView.Adapter<DiscoverAdapter.Discov
 //        holder.tvItemArtist.setText(album.getArtists().get(0).getName());
 //        holder.ivItem.setImageURI(Uri.parse(album.getImage()));
         Glide.with(context).load(album.getImage()).into(holder.ivItem);
+        holder.itemHome.setOnClickListener(v -> {
+            PlaylistFragment playlistFragment = new PlaylistFragment();
+            playlistFragment.setAlbum(album);
+            AppCompatActivity activity = (AppCompatActivity) v.getContext();
+            activity.getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, playlistFragment).addToBackStack(null).commit();
+        });
     }
 
     @Override
@@ -59,10 +68,12 @@ public class DiscoverAdapter extends RecyclerView.Adapter<DiscoverAdapter.Discov
     public static class DiscoverViewHolder extends RecyclerView.ViewHolder {
         private ImageView ivItem;
         private TextView tvItemName, tvItemArtist;
+        private LinearLayout itemHome;
         public DiscoverViewHolder(@NonNull View itemView) {
             super(itemView);
             ivItem = itemView.findViewById(R.id.ivItem);
             tvItemName = itemView.findViewById(R.id.tvItemName);
+            itemHome = itemView.findViewById(R.id.itemHome);
 //            tvItemArtist = itemView.findViewById(R.id.tvItemArtist);
         }
     }

@@ -42,7 +42,7 @@ public class SplashActivity extends AppCompatActivity {
                         Intent intent = new Intent(SplashActivity.this, MainActivity.class);
 //                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
-                        overridePendingTransition(R.anim.slide_to_right, R.anim.slide_to_right);
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
 //                        finish();
                     } else {
                         Log.e(TAG, "run: uuid not found " + uuid);

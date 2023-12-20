@@ -12,6 +12,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.vibe.vibe.constants.Schema;
 import com.vibe.vibe.entities.Album;
 import com.vibe.vibe.entities.Song;
+import com.vibe.vibe.utils.RandomValue;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -112,17 +113,17 @@ public class AlbumModel extends Model {
                     if (songs.size() > 0) {
                         album.setSongs(songs);
                         album.setArtistIds(artistContributor);
-                        Log.d(TAG, "onDataChange1: " + album.getArtistIds());
+                        Log.d(TAG, "onDataChange1: " + songs.get(0).getName());
                     }  else {
                         Log.d(TAG, "onDataChange2: " + album.getName());
                     }
                     Log.d(TAG, "onDataChange3: " + album.getName());
                     albums.add(album);
-                    if (albums.size() > 10) {
+                    if (albums.size() >= 30) {
                         break;
                     }
                 }
-                albumModelCallbacks.onCallback(albums);
+                albumModelCallbacks.onCallback(RandomValue.getRandomValues(albums, LIMIT_ALBUM));
             }
 
             @Override

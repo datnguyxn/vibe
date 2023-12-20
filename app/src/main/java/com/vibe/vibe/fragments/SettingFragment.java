@@ -26,7 +26,7 @@ import com.vibe.vibe.models.UserModel;
  * Use the {@link SettingFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SettingFragment extends Fragment {
+public class SettingFragment extends Fragment implements OptionEditProfileBottomSheetFragment.BottomSheetListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -43,6 +43,8 @@ public class SettingFragment extends Fragment {
     private ShapeableImageView ivAvatarProfile;
     private TextView tvProfileName, tvProfileInfo, tvEditProfile, tvUploadSongs;
     private final UserModel userModel = new UserModel();
+    private String id;
+    private String avatar;
 
     public SettingFragment() {
         // Required empty public constructor
@@ -92,6 +94,11 @@ public class SettingFragment extends Fragment {
         // TODO: Edit profile
         tvEditProfile.setOnClickListener(v -> {
             OptionEditProfileBottomSheetFragment optionEditProfileBottomSheetFragment = new OptionEditProfileBottomSheetFragment();
+            optionEditProfileBottomSheetFragment.setBottomSheetListener(this);
+            Bundle bundle = new Bundle();
+            bundle.putString("avatar", avatar);
+            bundle.putString("username", tvProfileName.getText().toString());
+            optionEditProfileBottomSheetFragment.setArguments(bundle);
             optionEditProfileBottomSheetFragment.show(getChildFragmentManager(), optionEditProfileBottomSheetFragment.getTag());
         });
         return convertView;
@@ -109,17 +116,18 @@ public class SettingFragment extends Fragment {
 
     private void setProfileInfo() {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(Application.SHARED_PREFERENCES_USER, getActivity().MODE_PRIVATE);
-        String id = sharedPreferences.getString(Application.SHARED_PREFERENCES_UUID, "");
+        id = sharedPreferences.getString(Application.SHARED_PREFERENCES_UUID, "");
         userModel.getUser(id, new UserModel.onGetUserListener() {
 
             @Override
             public void onGetUserSuccess(User user) {
                 Glide
-                    .with(getActivity())
-                    .load(user.getAvatar())
-                    .into(ivAvatarProfile);
+                        .with(getActivity())
+                        .load(user.getAvatar())
+                        .into(ivAvatarProfile);
                 tvProfileName.setText(user.getUsername());
-                tvProfileInfo.setText(user.getPhoneNumber()+ " ・ " + user.getEmail());
+                tvProfileInfo.setText(user.getPhoneNumber() + " ・ " + user.getEmail());
+                avatar = user.getAvatar();
             }
 
             @Override
@@ -129,4 +137,20 @@ public class SettingFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onDataReceived(String data) {
+        Log.e(TAG, "onDataReceived: " + data);
+        Glide
+                .with(getActivity())
+                .load(data)
+                .into(ivAvatarProfile);
+        userModel.updateAvatar(id, data);
+        avatar = data;
+    }
+
+    @Override
+    public void onUsernameReceived(String username) {
+        tvProfileName.setText(username);
+        userModel.updateUsername(id, username);
+    }
 }

@@ -30,6 +30,7 @@
         android:id="@+id/tvItemArtist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:text="James TW"
         android:fontFamily="sans-serif-light"
         android:textColor="@color/FlatWhite"

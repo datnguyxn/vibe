@@ -9,9 +9,9 @@
     tools:context=".fragments.HomeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fragmentHomeLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/fragmentHomeLayout"
         android:layout_marginHorizontal="@dimen/_10dp">
 
         <RelativeLayout
@@ -28,7 +28,6 @@
                 android:id="@+id/tvHello"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/bonjour"
                 android:textColor="#F5F5FA"
                 android:textSize="@dimen/_20sp" />
 
@@ -63,14 +62,13 @@
                 android:layout_width="@dimen/_80dp"
                 android:layout_height="@dimen/_80dp"
                 app:shapeAppearanceOverlay="@style/circleImageView"
-                app:strokeWidth="@dimen/_1dp"
-                android:src="@drawable/artist" />
+                app:strokeWidth="@dimen/_1dp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/_10dp"
                 android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/_10dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -78,16 +76,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="2dp"
+                    android:fontFamily="sans-serif-thin"
                     android:text="MORE FROM"
                     android:textColor="#F5F5FA"
-                    android:fontFamily="sans-serif-thin"
                     android:textSize="@dimen/_16sp" />
 
                 <TextView
                     android:id="@+id/tvName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Dean Lewis"
                     android:fontFamily="sans-serif-medium"
                     android:textColor="#F5F5FA"
                     android:textSize="@dimen/_24sp" />
@@ -104,30 +101,27 @@
 
             <ImageView
                 android:id="@+id/ivAlbum"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/album"
-                />
+                android:layout_width="150dp"
+                android:layout_height="150dp"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_marginLeft="@dimen/_10dp"
-                android:layout_toRightOf="@+id/ivAlbum">
+                android:layout_toRightOf="@+id/ivAlbum"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/tvAlbum"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Hurtless (Acoustic)"
                     android:textColor="#F5F5FA"
                     android:textSize="@dimen/_20sp" />
+
                 <TextView
                     android:id="@+id/textViewSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Single • Dean Lewis"
                     android:fontFamily="sans-serif-thin"
                     android:textColor="#DDDDDD" />
             </LinearLayout>
@@ -135,49 +129,60 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/ivAlbum"
-                android:layout_marginLeft="@dimen/_10dp"
                 android:layout_alignParentBottom="true"
-                >
+                android:layout_marginLeft="@dimen/_10dp"
+                android:layout_toRightOf="@+id/ivAlbum">
+
                 <ImageView
                     android:id="@+id/ivLike"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="16dp"
-                    android:layout_centerVertical="true"
                     android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="16dp"
                     android:src="@drawable/like" />
+
                 <ImageView
                     android:id="@+id/ivPlay"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="16dp"
                     android:layout_alignParentEnd="true"
-                    android:src="@drawable/play" />
+                    android:layout_marginRight="16dp"
+                    android:src="@drawable/property_1_play" />
             </RelativeLayout>
         </RelativeLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBarHome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="296dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/ll_3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_20dp"
-            app:layout_constraintStart_toStartOf="parent"
             android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/rl_1">
 
             <TextView
+                android:id="@+id/tvDiscover"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Discover something new"
                 android:textColor="@color/FlatWhite"
                 android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvDiscover"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
@@ -186,22 +191,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_20dp"
-            app:layout_constraintStart_toStartOf="parent"
             android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/ll_3">
 
             <TextView
+                android:id="@+id/tvRecentSongs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Jump back in"
                 android:textColor="@color/FlatWhite"
                 android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvRecentSongs"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
@@ -210,22 +216,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_20dp"
-            app:layout_constraintStart_toStartOf="parent"
             android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/ll_4">
 
             <TextView
+                android:id="@+id/tvRandomPlaylists"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Your heavy rotation"
                 android:textColor="@color/FlatWhite"
                 android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvRandomPlaylists"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
