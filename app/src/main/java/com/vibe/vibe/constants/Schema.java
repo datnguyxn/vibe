@@ -14,4 +14,5 @@ public class Schema {
     public static final String TOPICS = "topics";
     public static final String PLAYLISTS = "playlists";
     public static final String CONFIGURATION = "configuration";
+    public static final String RECENTLY_PLAYED = "recentlyPlayed";
 }

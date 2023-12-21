@@ -38,6 +38,11 @@ public class AlbumModel extends Model {
         void onAlbumSearchError(String error);
     }
 
+    public interface onGetAlbumListener {
+        void onAlbumFound(Album album);
+        void onAlbumNotExist();
+    }
+
     public interface AlbumModelCallbacks {
         void onCallback(ArrayList<Album> albumModels);
     }
@@ -119,7 +124,7 @@ public class AlbumModel extends Model {
                     }
                     Log.d(TAG, "onDataChange3: " + album.getName());
                     albums.add(album);
-                    if (albums.size() >= 30) {
+                    if (albums.size() >= 40) {
                         break;
                     }
                 }
@@ -212,6 +217,7 @@ public class AlbumModel extends Model {
                             }
                             Song song = new Song(id, name, artistIds, artistNames, thumbnail, url, releaseDateStr, artistName, duration, genres);
                             albumSongs.add(song);
+                            Log.e(TAG, "onDataChange: " + song.toString());
                             if (name.toLowerCase().contains(key.toLowerCase())) {
                                 songs.add(song);
                             }
@@ -241,6 +247,90 @@ public class AlbumModel extends Model {
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "onCancelled: error occur in search album + song");
                 listener.onAlbumSearchError(error.getMessage());
+            }
+        });
+    }
+
+    public void getAlbum(String id, onGetAlbumListener listener) {
+        database.child(Schema.ALBUMS).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Album album = new Album();
+                ArrayList<String> artistContributor = new ArrayList<>();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    if (dataSnapshot.getKey().equals(id)) {
+
+                        JSONObject jsonObject = new JSONObject((java.util.Map) dataSnapshot.getValue());
+                        album.setId(dataSnapshot.getKey());
+                        album.setName(jsonObject.optString("title"));
+                        album.setDescription(jsonObject.optString("sortDescription"));
+                        album.setImage(jsonObject.optString("thumbnail"));
+
+                        int releaseAt = jsonObject.optInt("releaseAt");
+                        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                        album.setCreatedDate(dateFormat.format(releaseAt));
+
+                        ArrayList<Song> songs = new ArrayList<>();
+                        JSONArray albumData = jsonObject.optJSONArray("albumData");
+                        if (albumData != null) {
+                            for (int i = 0; i < albumData.length(); i++) {
+                                JSONObject songObject = albumData.optJSONObject(i);
+                                String id = songObject.optString("id");
+                                String name = songObject.optString("title");
+
+                                int releaseDate = songObject.optInt("releaseDate");
+                                String releaseDateStr = dateFormat.format(releaseDate);
+
+                                String artistName = songObject.optString("artistName");
+
+                                JSONArray artistsIdArray = songObject.optJSONArray("artistIds");
+
+                                int duration = songObject.optInt("duration");
+
+                                String thumbnail = songObject.optString("thumbnail");
+
+                                String url = songObject.optString("url");
+                                ArrayList<String> artistIds = new ArrayList<>();
+                                ArrayList<String> artistNames = new ArrayList<>();
+
+                                if (artistsIdArray != null) {
+                                    for (int j = 0; j < artistsIdArray.length(); j++) {
+                                        JSONObject artistId = artistsIdArray.optJSONObject(j);
+                                        String artistIdStr = artistId.optString("id");
+                                        String artistNameStr = artistId.optString("name");
+                                        artistNames.add(artistNameStr);
+                                        artistIds.add(artistIdStr);
+                                        artistContributor.add(artistIdStr);
+                                    }
+                                }
+
+                                ArrayList<String> genres = new ArrayList<>();
+                                JSONArray genresArray = songObject.optJSONArray("genreIds");
+                                if (genresArray != null) {
+                                    for (int j = 0; j < genresArray.length(); j++) {
+                                        String genre = genresArray.optString(j);
+                                        genres.add(genre);
+                                    }
+                                }
+
+                                Song song = new Song(id, name, artistIds, artistNames, thumbnail, url, releaseDateStr, artistName, duration, genres);
+                                songs.add(song);
+                            }
+                        }
+                        if (songs.size() > 0) {
+                            album.setSongs(songs);
+                            album.setArtistIds(artistContributor);
+                            listener.onAlbumFound(album);
+                            return;
+                        }
+                    }
+                }
+                listener.onAlbumNotExist();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: error " + error.getMessage());
             }
         });
     }

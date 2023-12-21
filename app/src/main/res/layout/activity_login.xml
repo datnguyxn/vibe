@@ -49,7 +49,7 @@
                     android:hint="@string/phone_number"
                     android:inputType="phone"
                     android:textColor="@color/fifty_percent_black_overlay"
-                    android:textColorHint="#A9B1C7"
+                    android:textColorHint="@color/FlatWhite"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     tools:ignore="TouchTargetSizeCheck" />
@@ -75,7 +75,7 @@
                     android:hint="@string/password"
                     android:inputType="textPassword"
                     android:textColor="@color/fifty_percent_black_overlay"
-                    android:textColorHint="#A9B1C7"
+                    android:textColorHint="@color/FlatWhite"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     tools:ignore="TouchTargetSizeCheck" />

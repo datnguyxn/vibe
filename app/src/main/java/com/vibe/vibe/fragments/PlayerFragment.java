@@ -3,6 +3,7 @@ package com.vibe.vibe.fragments;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -26,11 +27,18 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.vibe.vibe.R;
 import com.vibe.vibe.constants.Action;
 import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.constants.Schema;
 import com.vibe.vibe.entities.Song;
+import com.vibe.vibe.models.PlaylistModel;
+import com.vibe.vibe.models.UserModel;
 import com.vibe.vibe.services.SongService;
 import com.vibe.vibe.utils.MainActivityListener;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -61,38 +69,22 @@ public class PlayerFragment extends Fragment {
     private boolean isRepeat = false;
     private int index = 0;
     private int seekTo = 0;
+    private String id;
+    private final UserModel userModel = new UserModel();
+    private final PlaylistModel playlistModel = new PlaylistModel();
     private final Handler handler = new Handler();
-    private Runnable updateSeekbar = new Runnable() {
-        @Override
-        public void run() {
-            if (isPlaying) {
-                seekTo = seekTo + 1;
-                seekBar.setProgress(seekTo);
-                tvCurrentTime.setText(durationToString(seekTo));
-                if (seekTo == song.getDuration()) {
-                    if (isRepeat) {
-                        seekTo = 0;
-                        sendBroadcastToService(Action.ACTION_SEEK_TO);
-                    } else {
-                        sendBroadcastToService(Action.ACTION_NEXT);
-                    }
-                }
-                handler.postDelayed(this, 1000);
-            }
-        }
-    };
-
 
     private BroadcastReceiver onReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
+                int action = bundle.getInt(Application.ACTION_TYPE);
                 isPlaying = bundle.getBoolean(Application.IS_PLAYING);
                 song = (Song) bundle.getSerializable(Application.CURRENT_SONG);
-                int action = bundle.getInt(Application.ACTION_TYPE);
                 index = bundle.getInt(Application.SONG_INDEX);
                 seekTo = bundle.getInt(Application.SEEK_BAR_PROGRESS, 0);
+                Log.w(TAG, "onReceive456: " + seekTo);
                 isShuffle = bundle.getBoolean(Application.IS_SHUFFLE, false);
                 isRepeat = bundle.getBoolean(Application.IS_REPEAT, false);
                 songs = (ArrayList<Song>) bundle.getSerializable(Application.SONGS_ARG);
@@ -129,8 +121,19 @@ public class PlayerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            Bundle bundle = getArguments();
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+            int action = getArguments().getInt(Application.ACTION_TYPE);
+            isPlaying = bundle.getBoolean(Application.IS_PLAYING);
+            song = (Song) bundle.getSerializable(Application.CURRENT_SONG);
+            index = bundle.getInt(Application.SONG_INDEX);
+            seekTo = bundle.getInt(Application.SEEK_BAR_PROGRESS, 0);
+            Log.w(TAG, "onReceive456: " + seekTo);
+            isShuffle = bundle.getBoolean(Application.IS_SHUFFLE, false);
+            isRepeat = bundle.getBoolean(Application.IS_REPEAT, false);
+            songs = (ArrayList<Song>) bundle.getSerializable(Application.SONGS_ARG);
+            Log.e(TAG, "onReceive: handle receive: " + action + " isPlaying: " + isPlaying + "; isShuffle: " + isShuffle + "; isRepeat: " + isRepeat + "; seekTo: " + seekTo);
         }
     }
 
@@ -140,6 +143,7 @@ public class PlayerFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         init(view);
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(onReceiver, SongService.getIntentFilter());
         hide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -148,7 +152,6 @@ public class PlayerFragment extends Fragment {
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-                fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.replace(R.id.frameLayout, homeFragment);
                 fragmentTransaction.commit();
                 showNavigationViews();
@@ -158,6 +161,9 @@ public class PlayerFragment extends Fragment {
         more.setOnClickListener(v -> {
             Log.d(TAG, "onClick: more");
             MoreOptionBottomSheetFragment moreOptionBottomSheetFragment = new MoreOptionBottomSheetFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(Application.CURRENT_SONG, song);
+            moreOptionBottomSheetFragment.setArguments(bundle);
             moreOptionBottomSheetFragment.show(getChildFragmentManager(), moreOptionBottomSheetFragment.getTag());
         });
 
@@ -173,7 +179,6 @@ public class PlayerFragment extends Fragment {
                 Log.e(TAG, "onCreateView: songs: " + songs.size());
             }
         }
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(onReceiver, SongService.getIntentFilter());
         initUIForPlayer();
         updateStatusUIForPlayer();
         checkSongAddedToFavorite();
@@ -192,6 +197,135 @@ public class PlayerFragment extends Fragment {
                 } else {
                     sendBroadcastToService(Action.ACTION_RESUME);
                 }
+            }
+        });
+        ivLike.setOnClickListener(v -> {
+            if (isLike) {
+                isLike = false;
+                ivLike.setImageResource(R.drawable.like);
+                removeSongFromFavorite();
+            } else {
+                isLike = true;
+                ivLike.setImageResource(R.drawable.unlike);
+                addSongFromFavorite();
+            }
+        });
+        ivShuffle.setOnClickListener(v -> {
+            isShuffle = !isShuffle;
+            updateStatusUIForPlayer();
+            sendBroadcastToService(Action.ACTION_SHUFFLE);
+        });
+        ivPrevious.setOnClickListener(v -> {
+            sendBroadcastToService(Action.ACTION_PREVIOUS);
+        });
+        ivNext.setOnClickListener(v -> {
+            sendBroadcastToService(Action.ACTION_NEXT);
+        });
+        ivRepeat.setOnClickListener(v -> {
+            isRepeat = !isRepeat;
+            updateStatusUIForPlayer();
+            sendBroadcastToService(Action.ACTION_REPEAT);
+        });
+    }
+
+    private void addSongFromFavorite() {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("songId", song.getId());
+        data.put("songName", song.getName());
+        userModel.getConfiguration(id, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
+                if (config == null) {
+                    config = new ArrayList<>();
+                }
+                if (config.size() == 0) {
+                    config.add(data);
+                } else {
+                    for (int i = 0; i < config.size(); i++) {
+                        String songId = (String) config.get(i).get("songId");
+                        if (songId.equals(song.getId())) {
+                            config.remove(i);
+                            break;
+                        }
+                    }
+                    config.add(data);
+                }
+                userModel.addConfiguration(id, Schema.FAVORITE_SONGS, config, new UserModel.OnAddConfigurationListener() {
+                    @Override
+                    public void onAddConfigurationSuccess() {
+                        playlistModel.addSongToPrivatePlaylistFavorite(id, id, song, new PlaylistModel.onPlaylistAddListener() {
+                            @Override
+                            public void onPlaylistAddSuccess() {
+                                Log.e(TAG, "onPlaylistAddSuccess: ");
+                                sendBroadcastToService(Action.ACTION_SONG_LIKED);
+                            }
+
+                            @Override
+                            public void onPlaylistAddFailure() {
+                                Log.d(TAG, "onPlaylistAddFailure: ");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onAddConfigurationFailure(String error) {
+                        Log.d(TAG, "onAddConfigurationFailure: " + error);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.d(TAG, "onFailure: " + error);
+            }
+        });
+    }
+
+    private void removeSongFromFavorite() {
+        userModel.getConfiguration(id, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
+                if (config == null) {
+                    config = new ArrayList<>();
+                }
+
+                if (config.size() == 0) {
+                    return;
+                } else {
+                    for (int i = 0; i < config.size(); i++) {
+                        if (config.get(i).get("songId").equals(song.getId())) {
+                            config.remove(i);
+                            break;
+                        }
+                    }
+                }
+                userModel.addConfiguration(id, Schema.FAVORITE_SONGS, config, new UserModel.OnAddConfigurationListener() {
+                    @Override
+                    public void onAddConfigurationSuccess() {
+                        playlistModel.removeSongToPrivatePlaylistFavorite(id, id, song, new PlaylistModel.onRemoveSongFromPlaylistListener() {
+                            @Override
+                            public void onRemoveSongFromPlaylistSuccess() {
+                                Log.e(TAG, "onRemoveSongFromPlaylistSuccess: ");
+                                sendBroadcastToService(Action.ACTION_SONG_LIKED);
+                            }
+
+                            @Override
+                            public void onRemoveSongFromPlaylistFailure(String error) {
+                                Log.d(TAG, "onRemoveSongFromPlaylistFailure: " + error);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onAddConfigurationFailure(String error) {
+                        Log.d(TAG, "onAddConfigurationFailure: " + error);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.d(TAG, "onFailure: " + error);
             }
         });
     }
@@ -230,6 +364,8 @@ public class PlayerFragment extends Fragment {
         tvCurrentTime = view.findViewById(R.id.tvCurrentTime);
         tvTotalTime = view.findViewById(R.id.tvTotalTime);
         seekBar = view.findViewById(R.id.seekBar);
+        SharedPreferences sharedPreferences = requireContext().getSharedPreferences(Application.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+        id = sharedPreferences.getString(Application.SHARED_PREFERENCES_UUID, "");
     }
 
     private void handleSeekbarChange() {
@@ -275,8 +411,7 @@ public class PlayerFragment extends Fragment {
                 break;
             }
             case Action.ACTION_NEXT:
-            case Action.ACTION_PREVIOUS:
-            case Action.ACTION_PLAY_BACK: {
+            case Action.ACTION_PREVIOUS: {
                 isLike = false;
                 updateSeekbarUI();
                 updateStatusUIForPlayer();
@@ -284,6 +419,13 @@ public class PlayerFragment extends Fragment {
                 removeUpdateCurrentDuration();
                 break;
             }
+            case Action.ACTION_PLAY_BACK:
+                isLike = false;
+                Log.e(TAG, "updateSeekbarUI: " + seekTo);
+                updateSeekbarUI();
+                updateStatusUIForPlayer();
+                initUIForPlayer();
+                break;
             case Action.ACTION_SHUFFLE: {
                 Log.e(TAG, "handleActionReceive: shuffle: " + isShuffle);
                 updateStatusUIForPlayer();
@@ -309,9 +451,30 @@ public class PlayerFragment extends Fragment {
         if (isPlaying) {
             ivPlay.setImageResource(R.drawable.pause);
         } else {
-            ivPlay.setImageResource(R.drawable.play);
+            ivPlay.setImageResource(R.drawable.property_1_play);
         }
     }
+
+    private Runnable updateSeekbar = new Runnable() {
+        @Override
+        public void run() {
+            if (isPlaying) {
+                seekTo = seekTo + 1;
+                seekBar.setProgress(seekTo);
+                tvCurrentTime.setText(durationToString(seekTo));
+                if (seekTo == song.getDuration()) {
+                    if (isRepeat) {
+                        seekTo = 0;
+                        sendBroadcastToService(Action.ACTION_SEEK_TO);
+                    } else {
+                        sendBroadcastToService(Action.ACTION_NEXT);
+                    }
+                }
+                handler.postDelayed(this, 1000);
+            }
+        }
+    };
+
 
     private void updateCurrentDuration() {
         handler.postDelayed(updateSeekbar, 1000);
@@ -387,6 +550,28 @@ public class PlayerFragment extends Fragment {
     }
 
     private void checkSongAddedToFavorite() {
+        userModel.getConfiguration(id, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
+                if (config == null) {
+                    isLike = false;
+                    ivLike.setImageResource(R.drawable.like);
+                    return;
+                } else {
+                    for (Map<String, Object> map : config) {
+                        if (Objects.equals(map.get(Schema.SONG_ID), song.getId())) {
+                            isLike = true;
+                            ivLike.setImageResource(R.drawable.unlike);
+                            break;
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onFailure(String error) {
+                Log.d(TAG, "onFailure: " + error);
+            }
+        });
     }
 
     @Override

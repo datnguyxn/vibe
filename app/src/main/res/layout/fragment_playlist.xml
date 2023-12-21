@@ -81,7 +81,14 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/playlistName" />
-
+        <ProgressBar
+            android:id="@+id/progressBarAlbum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="296dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
         <!--    action -->
         <LinearLayout
             android:id="@+id/actions"
@@ -142,13 +149,11 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <ImageButton
+                <ImageView
                     android:id="@+id/play_playlist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/property_1_play"
-                    android:contentDescription="TODO"
-                    app:tint="?attr/iconTintColor" />
+                    android:src="@drawable/property_1_play" />
             </LinearLayout>
         </LinearLayout>
 

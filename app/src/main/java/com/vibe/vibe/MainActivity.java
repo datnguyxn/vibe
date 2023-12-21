@@ -42,6 +42,7 @@ import com.vibe.vibe.authentication.LoginActivity;
 import com.vibe.vibe.constants.Action;
 import com.vibe.vibe.constants.Application;
 import com.vibe.vibe.constants.Schema;
+import com.vibe.vibe.entities.Album;
 import com.vibe.vibe.entities.Song;
 import com.vibe.vibe.fragments.AboutUsFragment;
 import com.vibe.vibe.fragments.BarCodeFragment;
@@ -50,13 +51,16 @@ import com.vibe.vibe.fragments.LibraryFragment;
 import com.vibe.vibe.fragments.PlayerFragment;
 import com.vibe.vibe.fragments.SearchFragment;
 import com.vibe.vibe.fragments.SettingFragment;
+import com.vibe.vibe.models.PlaylistModel;
 import com.vibe.vibe.models.UserModel;
 import com.vibe.vibe.services.SongService;
 import com.vibe.vibe.utils.MainActivityListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements MainActivityListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -74,9 +78,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
     private boolean isShuffle = false;
     private boolean isRepeat = false;
     private boolean isLiked = false;
-    private int seekTo = 0;
+    private int seekTo;
     private int index;
     private final UserModel userModel = new UserModel();
+    private final PlaylistModel playlistModel = new PlaylistModel();
     private ArrayList<Song> songs;
     private Song currentSong;
     private int action;
@@ -93,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
                 index = bundle.getInt(Application.SONG_INDEX);
 
                 seekTo = bundle.getInt(Application.SEEK_BAR_PROGRESS, 0);
+                Log.w(TAG, "onReceive123: seekTo: " + seekTo);
                 isPlaying = bundle.getBoolean(Application.IS_PLAYING);
                 isNowPlaying = bundle.getBoolean(Application.IN_NOW_PLAYING);
                 isShuffle = bundle.getBoolean(Application.IS_SHUFFLE, false);
@@ -117,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
         LocalBroadcastManager.getInstance(this).registerReceiver(onReceiver, SongService.getIntentFilter());
         init();
         handlePermissionForActivity();
+        handleBottomBehavior();
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
@@ -185,7 +192,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
                 return false;
             }
         });
-        handleBottomBehavior();
     }
 
     private void clearBottomMenuIcon() {
@@ -214,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
     private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
         fragmentTransaction.replace(R.id.frameLayout, fragment);
         fragmentTransaction.commit();
     }
@@ -224,16 +231,19 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
             if (isPlaying) {
                 sendBroadcastToService(Action.ACTION_PAUSE);
             } else {
-                sendBroadcastToService(Action.ACTION_PLAY);
+                sendBroadcastToService(Action.ACTION_RESUME);
             }
         });
         imgUnLike.setOnClickListener(v -> {
+            checkSongAddedToFavorite();
             if (isLiked) {
-                imgUnLike.setImageResource(R.drawable.unlike);
-                isLiked = false;
-            } else {
                 imgUnLike.setImageResource(R.drawable.like);
+                isLiked = false;
+                removeSongFromFavorite();
+            } else {
+                imgUnLike.setImageResource(R.drawable.unlike);
                 isLiked = true;
+                addSongFromFavorite();
             }
         });
         bottomCurrentSong.setOnClickListener(v -> {
@@ -254,6 +264,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
             bundle.putBoolean(Application.IS_REPEAT, isRepeat);
             bundle.putInt(Application.SEEK_BAR_PROGRESS, seekTo);
             bundle.putBoolean(Application.IS_PLAYING, isPlaying);
+            bundle.putInt(Application.ACTION_TYPE, action);
             Log.e(TAG, "handleBottomBehavior: " + isPlaying);
             fragment.setArguments(bundle);
             transaction.setCustomAnimations(R.anim.slide_up, 0, 0, R.anim.slide_up);
@@ -310,31 +321,58 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
             case Action.ACTION_PLAY:
                 updateBottomCurrentSong();
             case Action.ACTION_START:
-                Log.e(TAG, "handlePlayCurrentSongBehavior: " + action);
+                Log.e(TAG, "handlePlayCurrentSongBehavior1: " + action);
 //                bottomCurrentSong.setVisibility(View.VISIBLE);
                 updateBottomCurrentSong();
                 break;
             case Action.ACTION_PAUSE:
             case Action.ACTION_RESUME:
-                Log.e(TAG, "handlePlayCurrentSongBehavior: " + action);
+                Log.e(TAG, "handlePlayCurrentSongBehavior2: " + action);
                 updateStatusCurrentSong();
+                break;
+            case Action.ACTION_SONG_LIKED:
+                Log.e(TAG, "handlePlayCurrentSongBehavior3: " + action);
+                updateStatusCurrentSong();
+                break;
+            case Action.ACTION_PLAY_ALBUM:
+                Log.e(TAG, "handlePlayCurrentSongBehavior4: " + action);
+                updateBottomCurrentSong();
+                break;
+            case Action.ACTION_PLAY_BACK:
+                Log.e(TAG, "handlePlayCurrentSongBehavior5: " + action);
+                updateBottomCurrentSong();
+                break;
+            case Action.ACTION_NEXT:
+                Log.e(TAG, "handlePlayCurrentSongBehavior6: " + action);
+                updateBottomCurrentSong();
                 break;
         }
     }
 
     private void updateBottomCurrentSong() {
-        Log.e(TAG, "updateBottomCurrentSong: " + currentSong.getName());
+        Log.e(TAG, "updateBottomCurrentSong1: " + currentSong.getName());
+        Log.e(TAG, "updateBottomCurrentSong2: " + isNowPlaying);
         if (currentSong != null && !isNowPlaying) {
             bottomCurrentSong.setVisibility(View.VISIBLE);
             tvNameSong.setText(currentSong.getName());
             tvNameArtist.setText(currentSong.getArtistName());
+            checkSongAddedToFavorite();
             if (currentSong.getImageResource() != null) {
                 Glide.with(this).load(currentSong.getImageResource()).into(imgSong);
             } else {
                 Glide.with(this).load(R.drawable.current_song).into(imgSong);
             }
         } else {
-            bottomCurrentSong.setVisibility(View.GONE);
+            Log.e(TAG, "updateBottomCurrentSong3: " + isNowPlaying);
+//            bottomCurrentSong.setVisibility(View.GONE);
+            tvNameSong.setText(currentSong.getName());
+            tvNameArtist.setText(currentSong.getArtistName());
+            checkSongAddedToFavorite();
+            if (currentSong.getImageResource() != null) {
+                Glide.with(this).load(currentSong.getImageResource()).into(imgSong);
+            } else {
+                Glide.with(this).load(R.drawable.current_song).into(imgSong);
+            }
         }
         updateStatusCurrentSong();
     }
@@ -357,22 +395,126 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
     private void checkSongAddedToFavorite() {
         userModel.getConfiguration(uid, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
             @Override
-            public void onCompleted(List<Map<String, Object>> config) {
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
                 if (config == null) {
+                    isLiked = false;
+                    imgUnLike.setImageResource(R.drawable.like);
                     return;
                 } else {
                     for (Map<String, Object> map : config) {
-                        if (map.get(Schema.SONG_ID).equals(currentSong.getId())) {
+                        if (Objects.equals(map.get(Schema.SONG_ID), currentSong.getId())) {
                             isLiked = true;
+                            imgUnLike.setImageResource(R.drawable.unlike);
                             break;
                         }
                     }
                 }
             }
+            @Override
+            public void onFailure(String error) {
+                Log.d(TAG, "onFailure: " + error);
+            }
+        });
+    }
+
+    private void addSongFromFavorite() {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("songId", currentSong.getId());
+        data.put("songName", currentSong.getName());
+        userModel.getConfiguration(uid, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
+                if (config == null) {
+                    config = new ArrayList<>();
+                }
+                if (config.size() == 0) {
+                    config.add(data);
+                } else {
+                    for (int i = 0; i < config.size(); i++) {
+                        String songId = (String) config.get(i).get("songId");
+                        if (songId.equals(currentSong.getId())) {
+                            config.remove(i);
+                            break;
+                        }
+                    }
+                    config.add(data);
+                }
+                userModel.addConfiguration(uid, Schema.FAVORITE_SONGS, config, new UserModel.OnAddConfigurationListener() {
+                    @Override
+                    public void onAddConfigurationSuccess() {
+                        playlistModel.addSongToPrivatePlaylistFavorite(uid, uid, currentSong, new PlaylistModel.onPlaylistAddListener() {
+                            @Override
+                            public void onPlaylistAddSuccess() {
+                                Log.e(TAG, "onPlaylistAddSuccess: ");
+                                sendBroadcastToService(Action.ACTION_SONG_LIKED);
+                            }
+
+                            @Override
+                            public void onPlaylistAddFailure() {
+                                Log.d(TAG, "onPlaylistAddFailure: ");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onAddConfigurationFailure(String error) {
+                        Log.d(TAG, "onAddConfigurationFailure: " + error);
+                    }
+                });
+            }
 
             @Override
-            public void onFailure() {
-                Log.d(TAG, "onFailure: ");
+            public void onFailure(String error) {
+                Log.d(TAG, "onFailure: " + error);
+            }
+        });
+    }
+
+    private void removeSongFromFavorite() {
+        userModel.getConfiguration(uid, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
+                if (config == null) {
+                    config = new ArrayList<>();
+                }
+
+                if (config.size() == 0) {
+                    return;
+                } else {
+                    for (int i = 0; i < config.size(); i++) {
+                        if (config.get(i).get("songId").equals(currentSong.getId())) {
+                            config.remove(i);
+                            break;
+                        }
+                    }
+                }
+                userModel.addConfiguration(uid, Schema.FAVORITE_SONGS, config, new UserModel.OnAddConfigurationListener() {
+                    @Override
+                    public void onAddConfigurationSuccess() {
+                        playlistModel.removeSongToPrivatePlaylistFavorite(uid, uid, currentSong, new PlaylistModel.onRemoveSongFromPlaylistListener() {
+                            @Override
+                            public void onRemoveSongFromPlaylistSuccess() {
+                                Log.e(TAG, "onRemoveSongFromPlaylistSuccess: ");
+                                sendBroadcastToService(Action.ACTION_SONG_LIKED);
+                            }
+
+                            @Override
+                            public void onRemoveSongFromPlaylistFailure(String error) {
+                                Log.d(TAG, "onRemoveSongFromPlaylistFailure: " + error);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onAddConfigurationFailure(String error) {
+                        Log.d(TAG, "onAddConfigurationFailure: " + error);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.d(TAG, "onFailure: " + error);
             }
         });
     }

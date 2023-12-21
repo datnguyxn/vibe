@@ -112,7 +112,7 @@ public class OptionEditProfileBottomSheetFragment extends BottomSheetDialogFragm
     }
 
     private void openFileChooser() {
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        Intent photoPickerIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         photoPickerIntent.setType("image/*");
         startActivityForResult(photoPickerIntent, REQUEST_CODE);
     }

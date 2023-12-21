@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.vibe.vibe.R;
 import com.vibe.vibe.entities.Song;
 
@@ -25,6 +26,15 @@ public class RecentlySongsAdapter  extends RecyclerView.Adapter<RecentlySongsAda
     public RecentlySongsAdapter(Context context) {
         this.context = context;
         this.songs = new ArrayList<>();
+    }
+    public interface OnItemClickListener {
+        void onItemClick(Song song, int position);
+    }
+
+    private OnItemClickListener listener;
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
     public void setSongs(ArrayList<Song> songs) {
         this.songs = songs;
@@ -46,7 +56,7 @@ public class RecentlySongsAdapter  extends RecyclerView.Adapter<RecentlySongsAda
         Song song = songs.get(position);
         holder.tvItemName.setText(song.getName());
         holder.tvItemArtist.setText(song.getArtistName());
-        holder.ivItem.setImageURI(Uri.parse(song.getImageResource()));
+        Glide.with(context).load(Uri.parse(song.getImageResource())).into(holder.ivItem);
     }
 
     @Override
@@ -54,7 +64,7 @@ public class RecentlySongsAdapter  extends RecyclerView.Adapter<RecentlySongsAda
         return songs.size();
     }
 
-    public static class RecentlySongsViewHolder extends RecyclerView.ViewHolder {
+    public class RecentlySongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView ivItem;
         private TextView tvItemName, tvItemArtist;
         public RecentlySongsViewHolder(@NonNull View itemView) {
@@ -62,6 +72,19 @@ public class RecentlySongsAdapter  extends RecyclerView.Adapter<RecentlySongsAda
             ivItem = itemView.findViewById(R.id.ivItem);
             tvItemName = itemView.findViewById(R.id.tvItemName);
             tvItemArtist = itemView.findViewById(R.id.tvItemArtist);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (listener != null) {
+                int position = getAdapterPosition();
+                Song song = songs.get(position);
+//                check if position is valid
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onItemClick(song, position);
+                }
+            }
         }
     }
 }

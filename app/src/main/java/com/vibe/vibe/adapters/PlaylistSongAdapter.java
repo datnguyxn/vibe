@@ -40,6 +40,10 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
 
     private OnItemClickListener listener;
 
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
     private final UserModel userModel = new UserModel();
 
     public PlaylistSongAdapter(Context context) {
@@ -74,8 +78,10 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
         Glide.with(context).load(song.getImageResource()).into(holder.imageSong);
         userModel.getConfiguration(id, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
             @Override
-            public void onCompleted(List<Map<String, Object>> config) {
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
                 if (config == null) {
+                    isLiked = false;
+                    holder.ivLikeStatus.setImageResource(R.drawable.like);
                     return;
                 } else {
                     for (Map<String, Object> map : config) {
@@ -89,8 +95,8 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
             }
 
             @Override
-            public void onFailure() {
-                Log.d(TAG, "onFailure: ");
+            public void onFailure(String error) {
+                Log.d(TAG, "onFailure: " + error);
             }
         });
         holder.ivMoreOption.setOnClickListener(v -> {

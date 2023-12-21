@@ -66,6 +66,9 @@ public class ArtistModel extends Model{
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot artistSnapshot : dataSnapshot.getChildren()) {
                     Artist artist = artistSnapshot.getValue(Artist.class);
+                    assert artist != null;
+                    artist.setId(artistSnapshot.getKey());
+                    Log.e(TAG, "onDataChange: " + artist.toString());
                     artists.add(artist);
                     listener.onArtistAdded(artist);
                 }

@@ -1,18 +1,27 @@
 package com.vibe.vibe.fragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
-import com.vibe.vibe.adapters.LibraryAdapter;
-import com.vibe.vibe.entities.Album;
+import com.bumptech.glide.Glide;
+import com.google.android.material.imageview.ShapeableImageView;
+import com.google.android.material.snackbar.Snackbar;
+import com.vibe.vibe.adapters.ArtistAdapter;
+import com.vibe.vibe.adapters.PlaylistAdapter;
+import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.entities.Playlist;
 import com.vibe.vibe.entities.User;
 import com.vibe.vibe.R;
 import com.vibe.vibe.models.AlbumModel;
@@ -21,7 +30,6 @@ import com.vibe.vibe.models.PlaylistModel;
 import com.vibe.vibe.models.UserModel;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -40,11 +48,19 @@ public class LibraryFragment extends Fragment {
     private String mParam2;
 
     private static final String TAG = "LibraryFragment";
-    private ImageView ivAvatar;
+    private ImageView addPlaylistForUser;
+    private ShapeableImageView ivAvatarProfileInLibrary;
     private RecyclerView rcvPlaylist, rcvArtist;
+    private TextView tvUrLibrary;
     private final PlaylistModel playlistModel = new PlaylistModel();
+    private final AlbumModel albumModel = new AlbumModel();
     private final UserModel userModel = new UserModel();
     private final ArtistModel artistModel = new ArtistModel();
+    private PlaylistAdapter playlistAdapter;
+    private ArtistAdapter artistAdapter;
+    private ProgressBar progressBarLibrary;
+    private String uid;
+    private String username;
 
     public LibraryFragment() {
         // Required empty public constructor
@@ -82,21 +98,91 @@ public class LibraryFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View convertView = inflater.inflate(R.layout.fragment_library, container, false);
-        rcvPlaylist = convertView.findViewById(R.id.rcvPlaylist);
+        init(convertView);
+        rcvPlaylist.setVisibility(View.GONE);
+        tvUrLibrary.setVisibility(View.GONE);
+        rcvArtist.setVisibility(View.GONE);
+        addPlaylistForUser.setVisibility(View.GONE);
+        ivAvatarProfileInLibrary.setVisibility(View.GONE);
+        progressBarLibrary.setVisibility(View.VISIBLE);
+        initUiForUser();
         initPlaylist();
+        handleAddPlaylist();
         return convertView;
     }
 
-    public void initPlaylist() {
-        RecyclerView.LayoutManager layoutManager;
-        layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-        rcvPlaylist.setLayoutManager(layoutManager);
+    private void init(View convertView) {
+        rcvPlaylist = convertView.findViewById(R.id.rcvPlaylist);
+        tvUrLibrary = convertView.findViewById(R.id.tvUrLibrary);
+        rcvArtist = convertView.findViewById(R.id.rcvArtist);
+        ivAvatarProfileInLibrary = convertView.findViewById(R.id.ivAvatarProfileInLibrary);
+        progressBarLibrary = convertView.findViewById(R.id.progressBarLibrary);
+        addPlaylistForUser = convertView.findViewById(R.id.addPlaylistForUser);
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences(Application.SHARED_PREFERENCES_USER, getContext().MODE_PRIVATE);
+        uid = sharedPreferences.getString(Application.SHARED_PREFERENCES_UUID, "");
+        ivAvatarProfileInLibrary.setOnClickListener(v -> {
+            SettingFragment settingFragment = new SettingFragment();
+            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, settingFragment).addToBackStack(null).commit();
+        });
+    }
 
-        LibraryAdapter libraryAdapter = new LibraryAdapter(getContext());
-        rcvPlaylist.setAdapter(libraryAdapter);
+    private void initUiForUser() {
+        userModel.getUser(uid, new UserModel.onGetUserListener() {
+            @Override
+            public void onGetUserSuccess(User user) {
+                Glide.with(getActivity()).load(user.getAvatar()).into(ivAvatarProfileInLibrary);
+                username = user.getUsername();
+                initUI();
+            }
+
+            @Override
+            public void onGetUserFailure(String error) {
+                Log.d(TAG, "onGetUserFailure: " + error);
+                Snackbar.make(getView(), "Error", Snackbar.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void initPlaylist() {
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        rcvPlaylist.setLayoutManager(layoutManager);
+        playlistAdapter = new PlaylistAdapter(getContext());
+        rcvPlaylist.setAdapter(playlistAdapter);
         getLibrary();
     }
+
     private void getLibrary() {
-        
+        playlistModel.getPrivatePlaylist(uid, new PlaylistModel.OnGetPlaylistListener() {
+            @Override
+            public void onGetPlaylist(ArrayList<Playlist> playlists) {
+                Log.d(TAG, "onGetPlaylist: " + playlists.toString());
+                playlistAdapter.setPlaylistsForAdapter(playlists, username);
+                initUI();
+            }
+
+            @Override
+            public void onGetPlaylistFailed() {
+                Log.d(TAG, "onGetPlaylistFailed: ");
+            }
+        });
+    }
+
+    private void handleAddPlaylist() {
+        addPlaylistForUser.setOnClickListener(v -> {
+            AddPlaylistForUserBottomSheetFragment addPlaylistForUserBottomSheetFragment = new AddPlaylistForUserBottomSheetFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString(Application.SHARED_PREFERENCES_UUID, uid);
+            addPlaylistForUserBottomSheetFragment.setArguments(bundle);
+            addPlaylistForUserBottomSheetFragment.show(getFragmentManager(), addPlaylistForUserBottomSheetFragment.getTag());
+        });
+    }
+
+    private void initUI() {
+        rcvPlaylist.setVisibility(View.VISIBLE);
+        tvUrLibrary.setVisibility(View.VISIBLE);
+        addPlaylistForUser.setVisibility(View.VISIBLE);
+        rcvArtist.setVisibility(View.VISIBLE);
+        ivAvatarProfileInLibrary.setVisibility(View.VISIBLE);
+        progressBarLibrary.setVisibility(View.GONE);
     }
 }

@@ -28,6 +28,17 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static final int TYPE_DEFAULT = -1;
     private Context context;
     private ArrayList<Object> results = new ArrayList<>();
+    public interface OnItemClickListener {
+        void onItemClick(Song song, int position);
+        void onItemClick(Album album, int position);
+        void onItemClick(Artist artist, int position);
+    }
+
+    private OnItemClickListener listener;
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
 
     public SearchAdapter(Context context) {
         this.context = context;
@@ -144,7 +155,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
 
-    public static class SearchDefaultViewHolder extends RecyclerView.ViewHolder {
+    public class SearchDefaultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private ImageView imvPlaylist;
         private TextView tvPlaylistName, tvTitle;
@@ -153,10 +164,24 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             imvPlaylist = itemView.findViewById(R.id.imvPlaylist);
             tvPlaylistName = itemView.findViewById(R.id.tvPlaylistName);
             tvTitle = itemView.findViewById(R.id.tvTitle);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            int position = getAdapterPosition();
+            Object item = results.get(position);
+            if (item instanceof Song) {
+                Song song = (Song) item;
+                listener.onItemClick(song, position);
+            } else if (item instanceof Album) {
+                Album album = (Album) item;
+                listener.onItemClick(album, position);
+            }
         }
     }
 
-    public static class SearchArtistViewHolder extends RecyclerView.ViewHolder {
+    public class SearchArtistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView imvLibraryArtist;
         private TextView tvArtistName;
         private TextView tvTitle;
@@ -167,9 +192,18 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             tvArtistName = itemView.findViewById(R.id.tvArtistName);
             tvTitle = itemView.findViewById(R.id.tvTitle);
 //            tvTitle.setText("Artists");
-            tvTitle.setOnClickListener(v -> {
-                Log.e(TAG, "SearchArtistViewHolder: " + tvTitle.getText().toString());
-            });
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            int position = getAdapterPosition();
+            Object item = results.get(position);
+            if (item instanceof Artist) {
+                Artist artist = (Artist) item;
+                Log.e(TAG, "onClick: " + artist.toString());
+                listener.onItemClick(artist, position);
+            }
         }
     }
 }

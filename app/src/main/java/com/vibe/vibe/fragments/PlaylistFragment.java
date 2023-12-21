@@ -3,9 +3,11 @@ package com.vibe.vibe.fragments;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,16 +17,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.vibe.vibe.R;
 import com.vibe.vibe.adapters.PlaylistSongAdapter;
+import com.vibe.vibe.constants.Action;
 import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.constants.Schema;
 import com.vibe.vibe.entities.Album;
 import com.vibe.vibe.entities.Song;
+import com.vibe.vibe.models.AlbumModel;
+import com.vibe.vibe.models.PlaylistModel;
+import com.vibe.vibe.models.SongModel;
+import com.vibe.vibe.models.UserModel;
+import com.vibe.vibe.services.SongService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,7 +60,9 @@ public class PlaylistFragment extends Fragment {
     private TextView playlist_name, playlist_size;
     private RecyclerView rvplaylist_songs;
     private PlaylistSongAdapter playlistSongAdapter;
-    private ImageButton play_playlist, ibDownload, share, moreOptions;
+    private ProgressBar progressBarAlbum;
+    private ImageButton ibDownload, share, moreOptions;
+    private ImageView play_playlist;
     private ArrayList<Song> songs;
     private Album album;
     private boolean isPlaying = false;
@@ -55,6 +70,12 @@ public class PlaylistFragment extends Fragment {
     private boolean isRepeat = false;
     private ArrayList<Song> songPlaylist;
     private Song currentSong;
+    private int index = 0;
+    private String uid;
+    private final PlaylistModel playlistModel = new PlaylistModel();
+    private final UserModel userModel = new UserModel();
+    private final SongModel songModel = new SongModel();
+    private final AlbumModel albumModel = new AlbumModel();
 
     private BroadcastReceiver onReceiver = new BroadcastReceiver() {
         @Override
@@ -77,6 +98,13 @@ public class PlaylistFragment extends Fragment {
 
     public PlaylistFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.e(TAG, "onResume: ");
+        updateStatusUI();
     }
 
     /**
@@ -103,6 +131,8 @@ public class PlaylistFragment extends Fragment {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+            album = (Album) getArguments().getSerializable("album");
+            songs = album.getSongs();
         }
     }
 
@@ -112,15 +142,18 @@ public class PlaylistFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_playlist, container, false);
         init(view);
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(onReceiver, SongService.getIntentFilter());
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         rvplaylist_songs.setLayoutManager(layoutManager);
         playlistSongAdapter = new PlaylistSongAdapter(getContext());
         rvplaylist_songs.setAdapter(playlistSongAdapter);
         playlistSongAdapter.setSongs(songs);
         playlist_name.setText(album.getName());
-        playlist_size.setText(album.getSongs().size() + " songs");
+        playlist_size.setText(songs.size() + " songs");
         Glide.with(getContext()).load(album.getImage()).into(playlist_image);
         Glide.with(getContext()).load(album.getImage()).into(blur_image);
+        handleClickSong();
+        handleButtonBehavior();
         return view;
     }
 
@@ -132,9 +165,12 @@ public class PlaylistFragment extends Fragment {
         rvplaylist_songs = view.findViewById(R.id.rvplaylist_songs);
         imgBackPlaylistToHome = view.findViewById(R.id.imgBackPlaylistToHome);
         play_playlist = view.findViewById(R.id.play_playlist);
-        ibDownload  = view.findViewById(R.id.ibDownload);
+        ibDownload = view.findViewById(R.id.ibDownload);
         share = view.findViewById(R.id.share);
         moreOptions = view.findViewById(R.id.moreOptions);
+        progressBarAlbum = view.findViewById(R.id.progressBarAlbum);
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences(Application.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
+        uid = sharedPreferences.getString(Application.SHARED_PREFERENCES_UUID, null);
         imgBackPlaylistToHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,16 +181,163 @@ public class PlaylistFragment extends Fragment {
         });
     }
 
-    public void setAlbum(Album album) {
-        this.album = album;
-        Log.e(TAG, "setAlbum: " + album.toString());
-        songs = album.getSongs();
-        Log.e(TAG, "setAlbum: " + songs.toString());
+    public void setAlbum(Album album1) {
+        this.album = album1;
+        if (album.getSongs().isEmpty()) {
+            albumModel.getAlbum(album.getId(), new AlbumModel.onGetAlbumListener() {
+                @Override
+                public void onAlbumFound(Album album2) {
+                    Log.e(TAG, "onAlbumFound: " + album2.toString());
+                    album = album2;
+                    songs = album2.getSongs();
+                }
+
+                @Override
+                public void onAlbumNotExist() {
+                    Log.e(TAG, "onAlbumNotExist: ");
+                }
+            });
+        } else {
+            this.album = album1;
+            Log.e(TAG, "setAlbum11: " + album.getSongs().toString());
+            songs = album.getSongs();
+        }
+    }
+
+    private void handleClickSong() {
+        playlistSongAdapter.setOnItemClickListener(new PlaylistSongAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Song song, int position) {
+                HashMap<String, Object> data = new HashMap<>();
+                data.put("songId", song.getId());
+                data.put("songName", song.getName());
+                userModel.getConfiguration(uid, Schema.RECENTLY_PLAYED, new UserModel.onGetConfigListener() {
+                    @Override
+                    public void onCompleted(ArrayList<Map<String, Object>> config) {
+                        if (config == null) {
+                            config = new ArrayList<>();
+                        }
+
+                        if (config.size() == 0) {
+                            config.add(data);
+                        } else {
+                            for (int i = 0; i < config.size(); i++) {
+                                String songId = (String) config.get(i).get("songId");
+                                if (songId.equals(song.getId())) {
+                                    config.remove(i);
+                                    break;
+                                }
+                            }
+                            config.add(data);
+                        }
+                        userModel.addConfiguration(uid, Schema.RECENTLY_PLAYED, config, new UserModel.OnAddConfigurationListener() {
+                            @Override
+                            public void onAddConfigurationSuccess() {
+                                playlistModel.addSongToRecentlyPlaylistOfUser(uid, uid, song, new PlaylistModel.onPlaylistAddListener() {
+                                    @Override
+                                    public void onPlaylistAddSuccess() {
+                                        Log.d(TAG, "onPlaylistAddSuccess: ");
+                                    }
+
+                                    @Override
+                                    public void onPlaylistAddFailure() {
+                                        Log.d(TAG, "onPlaylistAddFailure: ");
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onAddConfigurationFailure(String error) {
+                                Log.d(TAG, "onAddConfigurationFailure: " + error);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        Log.d(TAG, "onFailure: " + error);
+                    }
+                });
+                Log.e(TAG, "onItemClick: " + song.toString());
+                sendActionToService(Action.ACTION_PLAY, position);
+            }
+        });
     }
 
     private void handleActionReceive(int action) {
         switch (action) {
-
+            case Action.ACTION_START:
+            case Action.ACTION_PLAY_ALBUM:
+            case Action.ACTION_PLAY:
+            case Action.ACTION_RESUME:
+            case Action.ACTION_PAUSE:
+            case Action.ACTION_CLOSE:
+                updateStatusUI();
+                break;
         }
+    }
+
+    private void updateStatusUI() {
+        if (isPlaying) {
+            play_playlist.setImageResource(R.drawable.pause);
+        } else {
+            play_playlist.setImageResource(R.drawable.property_1_play);
+        }
+    }
+
+    private void sendActionToService(int action, int position) {
+        Intent intent = new Intent(getContext(), SongService.class);
+        intent.putExtra(Application.ACTION_TYPE, action);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(Application.SONGS_ARG, album.getSongs());
+        intent.putExtra(Application.SONG_INDEX, position);
+        intent.putExtra(Application.IS_PLAYING, isPlaying);
+        intent.putExtra(Application.IS_SHUFFLE, isShuffle);
+        intent.putExtra(Application.IS_REPEAT, isRepeat);
+        intent.putExtras(bundle);
+        getContext().startService(intent);
+    }
+
+    private void handleButtonBehavior() {
+        play_playlist.setOnClickListener(v -> {
+            isPlaying = true;
+            Intent intent = new Intent(getContext(), SongService.class);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(Application.SONGS_ARG, album.getSongs());
+            if (isPlaying) {
+                intent.putExtra(Application.ACTION_TYPE, Action.ACTION_PLAY_ALBUM);
+            } else {
+                intent.putExtra(Application.ACTION_TYPE, Action.ACTION_PAUSE);
+            }
+            intent.putExtra(Application.SONG_INDEX, 0);
+            intent.putExtra(Application.IS_PLAYING, isPlaying);
+            intent.putExtras(bundle);
+            getContext().startService(intent);
+            updateStatusUI();
+        });
+
+        ibDownload.setOnClickListener(v -> {
+            Log.e(TAG, "handleButtonBehavior: download");
+            for (Song song : album.getSongs()) {
+                Log.e(TAG, "handleButtonBehavior: " + song.toString());
+                songModel.downloadSong(song.getId(), song.getName(), new SongModel.OnSongDownloadListener() {
+                    @Override
+                    public void onSongDownloadSuccess() {
+                        Log.e(TAG, "onSongDownloadSuccess: " + song.getName());
+                    }
+
+                    @Override
+                    public void onSongDownloadFailed() {
+                        Log.e(TAG, "onSongDownloadFailed: ");
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(onReceiver);
     }
 }

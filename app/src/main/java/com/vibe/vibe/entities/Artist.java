@@ -107,10 +107,12 @@ public class Artist implements Serializable {
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
-
+        result.put("artistId", id);
+        result.put("bio", bio);
         result.put("name", name);
         result.put("thumbnail", thumbnail);
         result.put("playlistId", playlistId);
+        result.put("createdDate", createdDate);
 
         return result;
     }

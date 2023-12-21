@@ -3,11 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".fragments.SearchFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:scrollbars="none"
+    tools:context=".fragments.ArtistFragment"
     android:background="@color/darkGray">
 
     <!--    image blur background-->
@@ -50,7 +50,7 @@
             app:layout_constraintTop_toBottomOf="@+id/artist_thumb">
 
             <TextView
-                android:id="@+id/playlist_name"
+                android:id="@+id/artistNameForArtistFragment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Harry Styles"
@@ -60,7 +60,7 @@
                 android:layout_weight="1"/>
 
             <ImageView
-                android:id="@+id/ivLikeStatus"
+                android:id="@+id/ivLikeArtist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/like"
@@ -79,6 +79,7 @@
             app:layout_constraintTop_toBottomOf="@+id/ll_artistName">
 
             <TextView
+                android:id="@+id/tvArtistAlbumsName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Popular releases"

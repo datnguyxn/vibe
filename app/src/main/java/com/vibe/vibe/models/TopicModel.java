@@ -8,6 +8,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.vibe.vibe.entities.Album;
+import com.vibe.vibe.entities.Song;
 import com.vibe.vibe.entities.Topic;
 import com.vibe.vibe.utils.RandomValue;
 
@@ -41,6 +42,7 @@ public class TopicModel extends Model {
                     topic.setTitle(jsonObject.optString("title"));
                     JSONObject data = jsonObject.optJSONObject("data");
                     ArrayList<Album> albums = new ArrayList<>();
+                    ArrayList<Song> songs = new ArrayList<>();
                     Iterator<String> keys = data.keys();
                     while (keys.hasNext()) {
                         String key = keys.next();
@@ -53,6 +55,7 @@ public class TopicModel extends Model {
                         int releaseAt = playlistObject.optInt("releaseAt");
                         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
                         album.setCreatedDate(dateFormat.format(releaseAt));
+                        album.setSongs(songs);
                         albums.add(album);
                     }
                     topic.setAlbums(albums);

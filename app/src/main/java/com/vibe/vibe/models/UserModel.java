@@ -53,9 +53,9 @@ public class UserModel extends Model {
     }
 
     public interface onGetConfigListener {
-        void onCompleted(List<Map<String, Object>> config);
+        void onCompleted(ArrayList<Map<String, Object>> config);
 
-        void onFailure();
+        void onFailure(String error);
     }
 
     public interface LoginCallBacks {
@@ -277,9 +277,9 @@ public class UserModel extends Model {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     Object values = snapshot.getValue();
-                    List<Map<String, Object>> list = new ArrayList<>();
-                    if (values instanceof List) {
-                        for (Object object : (List) values) {
+                    ArrayList<Map<String, Object>> list = new ArrayList<>();
+                    if (values instanceof ArrayList) {
+                        for (Object object : (ArrayList) values) {
                             if (object instanceof Map) {
                                 list.add((Map<String, Object>) object);
                             }
@@ -294,7 +294,7 @@ public class UserModel extends Model {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "onCancelled: error occur " + error.toString());
-                listener.onFailure();
+                listener.onFailure(error.getMessage());
             }
         });
     }

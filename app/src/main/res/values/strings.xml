@@ -51,4 +51,6 @@
     <string name="add_to_playlist">Add to Playlist</string>
     <string name="download">Download</string>
     <string name="share">Share</string>
+    <string name="add_new_playlist">Add New Playlist</string>
+    <string name="give_your_playlist_a_name">Give your playlist a name</string>
 </resources>

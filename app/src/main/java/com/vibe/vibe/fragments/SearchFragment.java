@@ -1,10 +1,12 @@
 package com.vibe.vibe.fragments;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,8 +20,14 @@ import android.widget.ProgressBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.vibe.vibe.R;
 import com.vibe.vibe.adapters.SearchAdapter;
+import com.vibe.vibe.constants.Action;
+import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.entities.Album;
+import com.vibe.vibe.entities.Artist;
+import com.vibe.vibe.entities.Song;
 import com.vibe.vibe.models.AlbumModel;
 import com.vibe.vibe.models.ArtistModel;
+import com.vibe.vibe.services.SongService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +99,7 @@ public class SearchFragment extends Fragment {
         rvSearchResults.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
         rvSearchResults.setAdapter(searchAdapter);
         initView();
+        handleClick();
         return view;
     }
 
@@ -188,5 +197,67 @@ public class SearchFragment extends Fragment {
                 }
             });
         }, 500);
+    }
+
+    private void handleClick() {
+        searchAdapter.setOnItemClickListener(new SearchAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Song song, int position) {
+                Log.d(TAG, "onItemClick: " + song.toString());
+                Intent intent = new Intent(getContext(), SongService.class);
+
+                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                Bundle bundle = new Bundle();
+                ArrayList<Song> songs = new ArrayList<>();
+                songs.add(song);
+                bundle.putSerializable(Application.SONGS_ARG, songs);
+//        bundle.putBoolean(Application.IS_PLAYING, true);
+                bundle.putSerializable(Application.CURRENT_SONG, song);
+
+                intent.putExtra(Application.ACTION_TYPE, Action.ACTION_PLAY);
+                intent.putExtras(bundle);
+                getActivity().startService(intent);
+
+                PlayerFragment playerFragment = new PlayerFragment();
+                playerFragment.setArguments(bundle);
+                fragmentTransaction.replace(R.id.frameLayout, playerFragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+
+            @Override
+            public void onItemClick(Album album, int position) {
+                Log.d(TAG, "onItemClick: " + album.toString());
+
+                albumModel.getAlbum(album.getId(), new AlbumModel.onGetAlbumListener() {
+                    @Override
+                    public void onAlbumFound(Album album) {
+                        Log.e(TAG, "onAlbumFound: " + album.toString());
+                        PlaylistFragment playlistFragment = new PlaylistFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("album", album);
+                        playlistFragment.setArguments(bundle);
+                        getActivity().getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.frameLayout, playlistFragment)
+                                .addToBackStack(null)
+                                .commit();
+                    }
+
+                    @Override
+                    public void onAlbumNotExist() {
+                        Snackbar.make(getView(), "Album not exist", Snackbar.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onItemClick(Artist artist, int position) {
+                Log.d(TAG, "onItemClick: " + artist.toString());
+                ArtistFragment artistFragment = new ArtistFragment();
+                artistFragment.setArtist(artist);
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, artistFragment).addToBackStack(null).commit();
+
+            }
+        });
     }
 }
