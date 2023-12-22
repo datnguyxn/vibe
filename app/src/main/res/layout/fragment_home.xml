@@ -125,14 +125,6 @@
                 android:layout_marginLeft="@dimen/_10dp"
                 android:layout_toRightOf="@+id/ivAlbum">
 
-                <ImageView
-                    android:id="@+id/ivLike"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="16dp"
-                    android:src="@drawable/like" />
 
                 <ImageView
                     android:id="@+id/ivPlay"

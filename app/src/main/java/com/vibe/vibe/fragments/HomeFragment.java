@@ -77,7 +77,7 @@ public class HomeFragment extends Fragment {
     private ScrollView fragmentHome;
     private ConstraintLayout constraintLayout;
     private TextView tvHello, tvName, tvDetail, tvAlbum, textViewSubtitle, tvDiscover, tvRecentSongs, tvRandomPlaylists;
-    private ImageView ivSettings, ivAlbum, ivLike, ivPlay;
+    private ImageView ivSettings, ivAlbum, ivPlay;
     private ShapeableImageView ivProfileArtist;
     private RecyclerView rvDiscover, rvRecentSongs, rvRandomPlaylists;
     private DiscoverAdapter discoverAdapter;
@@ -179,7 +179,6 @@ public class HomeFragment extends Fragment {
         tvRandomPlaylists.setVisibility(View.GONE);
         ivSettings.setVisibility(View.GONE);
         ivAlbum.setVisibility(View.GONE);
-        ivLike.setVisibility(View.GONE);
         ivPlay.setVisibility(View.GONE);
         ivProfileArtist.setVisibility(View.GONE);
         tvAlbum.setVisibility(View.GONE);
@@ -211,7 +210,6 @@ public class HomeFragment extends Fragment {
         tvRandomPlaylists = view.findViewById(R.id.tvRandomPlaylists);
         ivSettings = view.findViewById(R.id.ivSettings);
         ivAlbum = view.findViewById(R.id.ivAlbum);
-        ivLike = view.findViewById(R.id.ivLike);
         ivPlay = view.findViewById(R.id.ivPlay);
         ivProfileArtist = view.findViewById(R.id.ivProfileArtist);
         tvAlbum = view.findViewById(R.id.tvAlbum);
@@ -359,7 +357,6 @@ public class HomeFragment extends Fragment {
         tvRandomPlaylists.setVisibility(View.VISIBLE);
         ivSettings.setVisibility(View.VISIBLE);
         ivAlbum.setVisibility(View.VISIBLE);
-        ivLike.setVisibility(View.VISIBLE);
         ivPlay.setVisibility(View.VISIBLE);
         ivProfileArtist.setVisibility(View.VISIBLE);
         tvAlbum.setVisibility(View.VISIBLE);

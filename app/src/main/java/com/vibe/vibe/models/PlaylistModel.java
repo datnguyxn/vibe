@@ -88,6 +88,11 @@ public class PlaylistModel extends Model {
 
         void onRemovePlaylistFailed();
     }
+    public interface OnUpdatePlaylistListener {
+        void onUpdatePlaylistSuccess();
+
+        void onUpdatePlaylistFailed();
+    }
 
     public PlaylistModel() {
         super();
@@ -530,7 +535,7 @@ public class PlaylistModel extends Model {
                         String image = playlist.optString("image");
                         String description = playlist.optString("description");
                         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-                        JSONObject favoriteSongs = playlist.optJSONObject("songs");
+                        JSONObject favoriteSongs = playlist.optJSONObject("favoriteSongs");
                         ArrayList<String> artistContributor = new ArrayList<>();
 
                         if (favoriteSongs != null) {
@@ -580,6 +585,9 @@ public class PlaylistModel extends Model {
                                 album.setSongs(songs);
                                 album.setArtistIds(artistContributor);
                             }
+                        }
+                        else {
+                            album.setSongs(new ArrayList<>());
                         }
                         album.setName(name);
                         album.setId(id);
@@ -685,5 +693,17 @@ public class PlaylistModel extends Model {
                     }
                 })
                 .addOnFailureListener(e -> listener.onRemovePlaylistFailed());
+    }
+
+    public void updatePlaylistForUser(String uid, String playlistId, Map<String, Object> values, OnUpdatePlaylistListener listener) {
+        database.child(PLAYLIST_COLLECTION).child(uid).child(playlistId).updateChildren(values)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        listener.onUpdatePlaylistSuccess();
+                    } else {
+                        listener.onUpdatePlaylistFailed();
+                    }
+                })
+                .addOnFailureListener(e -> listener.onUpdatePlaylistFailed());
     }
 }

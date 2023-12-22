@@ -1,5 +1,6 @@
 package com.vibe.vibe.fragments;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,10 +18,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.snackbar.Snackbar;
 import com.vibe.vibe.R;
 import com.vibe.vibe.adapters.PlaylistSongAdapter;
 import com.vibe.vibe.constants.Action;
@@ -71,6 +75,7 @@ public class PlaylistFragment extends Fragment {
     private ArrayList<Song> songPlaylist;
     private Song currentSong;
     private int index = 0;
+    private boolean isPlaylist = false;
     private String uid;
     private final PlaylistModel playlistModel = new PlaylistModel();
     private final UserModel userModel = new UserModel();
@@ -133,6 +138,11 @@ public class PlaylistFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
             album = (Album) getArguments().getSerializable("album");
             songs = album.getSongs();
+            if (getArguments().getString("playlist").equals("") || album.getName().equals("Liked Songs")) {
+                isPlaylist = false;
+            } else {
+                isPlaylist = true;
+            }
         }
     }
 
@@ -150,8 +160,98 @@ public class PlaylistFragment extends Fragment {
         playlistSongAdapter.setSongs(songs);
         playlist_name.setText(album.getName());
         playlist_size.setText(songs.size() + " songs");
-        Glide.with(getContext()).load(album.getImage()).into(playlist_image);
-        Glide.with(getContext()).load(album.getImage()).into(blur_image);
+        if (!isPlaylist) {
+            moreOptions.setVisibility(View.GONE);
+        } else {
+            moreOptions.setVisibility(View.VISIBLE);
+            moreOptions.setOnClickListener(v -> {
+                PopupMenu popupMenu = new PopupMenu(getContext(), moreOptions);
+                popupMenu.inflate(R.menu.playlist_menu);
+                popupMenu.setOnMenuItemClickListener(menuItem -> {
+                    if (menuItem.getItemId() == R.id.editPlaylist) {
+                        EditPlaylistBottomSheetFragment editPlaylistBottomSheetFragment = new EditPlaylistBottomSheetFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("album", album);
+                        bundle.putString("uid", uid);
+                        editPlaylistBottomSheetFragment.setArguments(bundle);
+                        editPlaylistBottomSheetFragment.show(getFragmentManager(), editPlaylistBottomSheetFragment.getTag());
+                        return true;
+                    } else if (menuItem.getItemId() == R.id.deletePlaylist) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setTitle("Delete playlist");
+                        builder.setMessage("Are you sure you want to delete this playlist?");
+                        builder.setPositiveButton("Yes", (dialog, which) -> {
+                                    userModel.getConfiguration(uid, Schema.PRIVATE_PLAYLISTS, new UserModel.onGetConfigListener() {
+                                        @Override
+                                        public void onCompleted(ArrayList<Map<String, Object>> config) {
+                                            if (config == null) {
+                                                config = new ArrayList<>();
+                                            }
+
+                                            if (config.size() == 0) {
+                                                return;
+                                            } else {
+                                                for (int i = 0; i < config.size(); i++) {
+                                                    if (config.get(i).get("id").equals(album.getId())) {
+                                                        config.remove(i);
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                           userModel.addConfiguration(uid, Schema.PRIVATE_PLAYLISTS, config, new UserModel.OnAddConfigurationListener() {
+                                               @Override
+                                               public void onAddConfigurationSuccess() {
+                                                   playlistModel.removePlaylistForUser(uid, album.getId(), new PlaylistModel.OnRemovePlaylistListener() {
+                                                       @Override
+                                                       public void onRemovePlaylistSuccess() {
+                                                           Snackbar.make(getView(), "Delete playlist successfully", Snackbar.LENGTH_SHORT).show();
+                                                           LibraryFragment libraryFragment = new LibraryFragment();
+                                                           getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, libraryFragment).commit();
+                                                       }
+
+                                                       @Override
+                                                       public void onRemovePlaylistFailed() {
+                                                           Snackbar.make(getView(), "Delete playlist failed", Snackbar.LENGTH_SHORT).show();
+                                                       }
+                                                   });
+                                               }
+
+                                               @Override
+                                               public void onAddConfigurationFailure(String error) {
+                                                   Log.d(TAG, "onAddConfigurationFailure: " + error);
+                                               }
+                                           });
+                                        }
+
+                                        @Override
+                                        public void onFailure(String error) {
+                                            Log.d(TAG, "onFailure: " + error);
+                                        }
+                                    });
+                                })
+                                .setNegativeButton("No", (dialog, which) -> {
+                                    dialog.dismiss();
+                                })
+                                .show();
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                popupMenu.show();
+            });
+        }
+        if (album.getImage().equals("")) {
+            Glide.with(getContext()).load(R.drawable.default_playlist).into(playlist_image);
+            Glide.with(getContext()).load(R.drawable.default_playlist).into(blur_image);
+        } else {
+            Glide.with(getContext()).load(album.getImage()).into(playlist_image);
+            Glide.with(getContext()).load(album.getImage()).into(blur_image);
+        }
+        if (album.getName().equals("Liked Songs")) {
+            Glide.with(getContext()).load(R.drawable.like_song).into(playlist_image);
+            Glide.with(getContext()).load(R.drawable.like_song).into(blur_image);
+        }
         handleClickSong();
         handleButtonBehavior();
         return view;
@@ -324,6 +424,7 @@ public class PlaylistFragment extends Fragment {
                     @Override
                     public void onSongDownloadSuccess() {
                         Log.e(TAG, "onSongDownloadSuccess: " + song.getName());
+                        Snackbar.make(getView(), "Download " + song.getName() + " successfully", Snackbar.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -338,6 +439,7 @@ public class PlaylistFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.e(TAG, "onDestroy: ");
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(onReceiver);
     }
 }

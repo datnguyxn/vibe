@@ -235,14 +235,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
             }
         });
         imgUnLike.setOnClickListener(v -> {
-            checkSongAddedToFavorite();
             if (isLiked) {
-                imgUnLike.setImageResource(R.drawable.like);
                 isLiked = false;
+                imgUnLike.setImageResource(R.drawable.like);
                 removeSongFromFavorite();
             } else {
-                imgUnLike.setImageResource(R.drawable.unlike);
                 isLiked = true;
+                imgUnLike.setImageResource(R.drawable.unlike);
                 addSongFromFavorite();
             }
         });
@@ -331,7 +330,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
                 updateStatusCurrentSong();
                 break;
             case Action.ACTION_SONG_LIKED:
-                Log.e(TAG, "handlePlayCurrentSongBehavior3: " + action);
+                Log.e(TAG, "handlePlayCurrentSongBehavior3: " + action + isLiked);
+                checkSongAddedToFavorite();
                 updateStatusCurrentSong();
                 break;
             case Action.ACTION_PLAY_ALBUM:
@@ -343,9 +343,16 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
                 updateBottomCurrentSong();
                 break;
             case Action.ACTION_NEXT:
+            case Action.ACTION_PREVIOUS:
                 Log.e(TAG, "handlePlayCurrentSongBehavior6: " + action);
+                checkSongAddedToFavorite();
                 updateBottomCurrentSong();
                 break;
+            case Action.ACTION_CLOSE: {
+                Log.e(TAG, "handleLayoutCurrentSong: hide current song bottom");
+                bottomCurrentSong.setVisibility(View.GONE);
+                break;
+            }
         }
     }
 
@@ -356,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
             bottomCurrentSong.setVisibility(View.VISIBLE);
             tvNameSong.setText(currentSong.getName());
             tvNameArtist.setText(currentSong.getArtistName());
-            checkSongAddedToFavorite();
+            updateStatusCurrentSong();
             if (currentSong.getImageResource() != null) {
                 Glide.with(this).load(currentSong.getImageResource()).into(imgSong);
             } else {
@@ -367,14 +374,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
 //            bottomCurrentSong.setVisibility(View.GONE);
             tvNameSong.setText(currentSong.getName());
             tvNameArtist.setText(currentSong.getArtistName());
-            checkSongAddedToFavorite();
+            updateStatusCurrentSong();
             if (currentSong.getImageResource() != null) {
                 Glide.with(this).load(currentSong.getImageResource()).into(imgSong);
             } else {
                 Glide.with(this).load(R.drawable.current_song).into(imgSong);
             }
         }
-        updateStatusCurrentSong();
     }
 
     private void updateStatusCurrentSong() {
@@ -383,12 +389,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
         } else {
             imgPause.setImageResource(R.drawable.play_no_color);
         }
-
         checkSongAddedToFavorite();
         if (isLiked) {
-            imgUnLike.setImageResource(R.drawable.like);
-        } else {
+            Log.e(TAG, "updateStatusCurrentSong1: " + isLiked);
             imgUnLike.setImageResource(R.drawable.unlike);
+        } else {
+            Log.e(TAG, "updateStatusCurrentSong2: " + isLiked);
+            imgUnLike.setImageResource(R.drawable.like);
         }
     }
 
@@ -410,6 +417,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
                     }
                 }
             }
+
             @Override
             public void onFailure(String error) {
                 Log.d(TAG, "onFailure: " + error);

@@ -1,5 +1,6 @@
 package com.vibe.vibe.fragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -14,8 +15,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.snackbar.Snackbar;
 import com.vibe.vibe.R;
 import com.vibe.vibe.adapters.ArtistAdapter;
+import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.constants.Schema;
 import com.vibe.vibe.entities.Album;
 import com.vibe.vibe.entities.Artist;
 import com.vibe.vibe.entities.Song;
@@ -23,6 +27,9 @@ import com.vibe.vibe.models.PlaylistModel;
 import com.vibe.vibe.models.UserModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,7 +42,7 @@ public class ArtistFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final String TAG ="ArtistFragment" ;
+    private static final String TAG = "ArtistFragment";
     private ImageView artist_thumb, imgBackFromArtistToHome, ivLikeStatus;
     private TextView artistName, tvArtistAlbumsName;
     private RecyclerView rvArtistAlbums;
@@ -43,6 +50,8 @@ public class ArtistFragment extends Fragment {
     private final UserModel userModel = new UserModel();
     private ArtistAdapter artistAdapter;
     private Artist artist;
+    private boolean isFavorite = false;
+    private String uid;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -95,6 +104,7 @@ public class ArtistFragment extends Fragment {
         Glide.with(getActivity()).load(artist.getThumbnail()).into(artist_thumb);
         getPlaylistOfArtist();
         handleClick();
+        checkAritstAddedToFavorite();
         return view;
     }
 
@@ -112,6 +122,8 @@ public class ArtistFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences(Application.SHARED_PREFERENCES_USER, getContext().MODE_PRIVATE);
+        uid = sharedPreferences.getString(Application.SHARED_PREFERENCES_UUID, "");
     }
 
     public void setArtist(Artist newArtist) {
@@ -142,6 +154,7 @@ public class ArtistFragment extends Fragment {
             tvArtistAlbumsName.setText("No albums");
         }
     }
+
     private void handleClick() {
         artistAdapter.setOnItemClickListener(new ArtistAdapter.OnItemClickListener() {
             @Override
@@ -149,11 +162,134 @@ public class ArtistFragment extends Fragment {
                 PlaylistFragment playlistFragment = new PlaylistFragment();
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("album", album);
+                bundle.putString("playlist", "");
                 playlistFragment.setArguments(bundle);
                 getActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.frameLayout, playlistFragment, "findThisFragment")
                         .addToBackStack(null)
                         .commit();
+            }
+        });
+        ivLikeStatus.setOnClickListener(v -> {
+            if (isFavorite) {
+                ivLikeStatus.setImageResource(R.drawable.like);
+                isFavorite = false;
+                removeArtistFromFavorite(artist);
+            } else {
+                ivLikeStatus.setImageResource(R.drawable.unlike);
+                isFavorite = true;
+                addArtistToFavorite(artist);
+            }
+        });
+    }
+
+    private void addArtistToFavorite(Artist artist) {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("artistId", artist.getId());
+        data.put("artistName", artist.getName());
+        data.put("image", artist.getThumbnail());
+        data.put("playlistId", artist.getPlaylistId());
+        userModel.getConfiguration(uid, Schema.FAVORITE_ARTISTS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
+                if (config == null) {
+                    config = new ArrayList<>();
+                }
+
+                if (config.size() == 0) {
+                    config.add(data);
+                } else {
+                    for (int i = 0; i < config.size(); i++) {
+                        String artistId = (String) config.get(i).get("artistId");
+                        if (artistId.equals(artist.getId())) {
+                            config.remove(i);
+                            break;
+                        }
+                    }
+                    config.add(data);
+                }
+                userModel.addConfiguration(uid, Schema.FAVORITE_ARTISTS, config, new UserModel.OnAddConfigurationListener() {
+                    @Override
+                    public void onAddConfigurationSuccess() {
+                        Log.e(TAG, "onAddConfigurationSuccess: config artist add " + artist.getName() + " update completed");
+                        Snackbar.make(getView(), "Added Artist to favorite successfully", Snackbar.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onAddConfigurationFailure(String error) {
+                        Log.e(TAG, "onAddConfigurationFailure: error" + error);
+                        Snackbar.make(getView(), "Added Artist to favorite failure", Snackbar.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "onFailure: error" + error);
+                Snackbar.make(getView(), "Added Artist to favorite failure", Snackbar.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void removeArtistFromFavorite(Artist artist) {
+        userModel.getConfiguration(uid, Schema.FAVORITE_ARTISTS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
+                if (config == null || config.size() == 0) {
+                    return;
+                }
+
+                for (int i = 0; i < config.size(); i++) {
+                    String artistId = (String) config.get(i).get("artistId");
+                    if (artistId.equals(artist.getId())) {
+                        config.remove(i);
+                        break;
+                    }
+                }
+                userModel.addConfiguration(uid, Schema.FAVORITE_ARTISTS, config, new UserModel.OnAddConfigurationListener() {
+                    @Override
+                    public void onAddConfigurationSuccess() {
+                        Log.e(TAG, "onAddConfigurationSuccess: config artist remove " + artist.getName() + " update completed");
+                        Snackbar.make(getView(), "Removed Artist from favorite successfully", Snackbar.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onAddConfigurationFailure(String error) {
+                        Log.e(TAG, "onAddConfigurationFailure: error" + error);
+                        Snackbar.make(getView(), "Removed Artist from favorite failure", Snackbar.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "onFailure: error" + error);
+                Snackbar.make(getView(), "Removed Artist from favorite failure", Snackbar.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void checkAritstAddedToFavorite() {
+        userModel.getConfiguration(uid, Schema.FAVORITE_ARTISTS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
+                if (config == null) {
+                    isFavorite = false;
+                    ivLikeStatus.setImageResource(R.drawable.like);
+                    return;
+                } else {
+                    for (Map<String, Object> map : config) {
+                        if (Objects.equals(map.get("artistId"), artist.getId())) {
+                            isFavorite = true;
+                            ivLikeStatus.setImageResource(R.drawable.unlike);
+                            break;
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onFailure(String error) {
+                Log.d(TAG, "onFailure: " + error);
             }
         });
     }

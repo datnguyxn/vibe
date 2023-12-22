@@ -236,6 +236,7 @@ public class SearchFragment extends Fragment {
                         PlaylistFragment playlistFragment = new PlaylistFragment();
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("album", album);
+                        bundle.putString("playlist", "");
                         playlistFragment.setArguments(bundle);
                         getActivity().getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.frameLayout, playlistFragment)

@@ -163,6 +163,7 @@ public class PlayerFragment extends Fragment {
             MoreOptionBottomSheetFragment moreOptionBottomSheetFragment = new MoreOptionBottomSheetFragment();
             Bundle bundle = new Bundle();
             bundle.putSerializable(Application.CURRENT_SONG, song);
+            bundle.putBoolean("Like", isLike);
             moreOptionBottomSheetFragment.setArguments(bundle);
             moreOptionBottomSheetFragment.show(getChildFragmentManager(), moreOptionBottomSheetFragment.getTag());
         });

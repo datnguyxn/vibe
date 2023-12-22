@@ -16,8 +16,12 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.vibe.vibe.constants.Application;
 import com.vibe.vibe.constants.Schema;
+import com.vibe.vibe.entities.Artist;
 import com.vibe.vibe.entities.User;
 import com.vibe.vibe.utils.HashPassword;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -67,6 +71,11 @@ public class UserModel extends Model {
     public interface OnAddConfigurationListener {
         void onAddConfigurationSuccess();
         void onAddConfigurationFailure(String error);
+    }
+
+    public interface OnGetArtistFavoriteListener {
+        void onCompleted(ArrayList<Artist> artists);
+        void onFailure();
     }
 
     public UserModel() {
@@ -295,6 +304,47 @@ public class UserModel extends Model {
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "onCancelled: error occur " + error.toString());
                 listener.onFailure(error.getMessage());
+            }
+        });
+    }
+    public void getAristOfUser(String userId, OnGetArtistFavoriteListener listener) {
+        Query query = database.child(USERS_COLLECTION).child(userId).child(Schema.CONFIGURATION).child(Schema.FAVORITE_ARTISTS);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Object values = snapshot.getValue();
+                    if (values instanceof List) {
+                        JSONArray artists = new JSONArray((List) values);
+                        if (artists != null) {
+                            ArrayList<Artist> artistArrayList = new ArrayList<>();
+                            for (int i = 0; i < artists.length(); i++) {
+                                JSONObject artist = artists.optJSONObject(i);
+                                try {
+                                    String id = artist.getString("artistId");
+                                    String name = artist.getString("artistName");
+                                    String image = artist.getString("image");
+                                    String playlistId = artist.getString("playlistId");
+
+                                    Artist newArtist = new Artist(id, name, image, playlistId);
+                                    artistArrayList.add(newArtist);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            listener.onCompleted(artistArrayList);
+                        } else {
+                            listener.onCompleted(null);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: error occur " + error.toString());
+                listener.onFailure();
             }
         });
     }

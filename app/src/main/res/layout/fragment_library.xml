@@ -68,16 +68,16 @@
 
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rcvArtist"
+                android:id="@+id/rcvPlaylist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rcvPlaylist"
+                android:id="@+id/rcvArtist"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp" />
+                android:layout_height="wrap_content"/>
+
 
         </LinearLayout>
 

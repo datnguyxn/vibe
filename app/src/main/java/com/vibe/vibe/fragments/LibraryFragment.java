@@ -19,8 +19,11 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.snackbar.Snackbar;
 import com.vibe.vibe.adapters.ArtistAdapter;
+import com.vibe.vibe.adapters.ArtistFavoriteAdapter;
 import com.vibe.vibe.adapters.PlaylistAdapter;
 import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.entities.Album;
+import com.vibe.vibe.entities.Artist;
 import com.vibe.vibe.entities.Playlist;
 import com.vibe.vibe.entities.User;
 import com.vibe.vibe.R;
@@ -57,7 +60,7 @@ public class LibraryFragment extends Fragment {
     private final UserModel userModel = new UserModel();
     private final ArtistModel artistModel = new ArtistModel();
     private PlaylistAdapter playlistAdapter;
-    private ArtistAdapter artistAdapter;
+    private ArtistFavoriteAdapter artistAdapter;
     private ProgressBar progressBarLibrary;
     private String uid;
     private String username;
@@ -107,7 +110,9 @@ public class LibraryFragment extends Fragment {
         progressBarLibrary.setVisibility(View.VISIBLE);
         initUiForUser();
         initPlaylist();
+        initArtist();
         handleAddPlaylist();
+        handleClickPlaylist();
         return convertView;
     }
 
@@ -174,6 +179,63 @@ public class LibraryFragment extends Fragment {
             bundle.putString(Application.SHARED_PREFERENCES_UUID, uid);
             addPlaylistForUserBottomSheetFragment.setArguments(bundle);
             addPlaylistForUserBottomSheetFragment.show(getFragmentManager(), addPlaylistForUserBottomSheetFragment.getTag());
+        });
+    }
+
+    private void handleClickPlaylist() {
+        playlistAdapter.setOnItemClickListener(new PlaylistAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Playlist playlist, int position) {
+                playlistModel.getPlaylistOfUser(uid, playlist.getId(), new PlaylistModel.onGetAllPlaylistOfUserListener() {
+                    @Override
+                    public void onGetAllPlaylistSuccess(Album album) {
+                        Log.d(TAG, "onGetAllPlaylistSuccess: " + album.toString());
+                        PlaylistFragment playlistFragment = new PlaylistFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("album", album);
+                        bundle.putString("playlist", "This is a playlist");
+                        playlistFragment.setArguments(bundle);
+                        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, playlistFragment).addToBackStack(null).commit();
+                    }
+
+                    @Override
+                    public void onGetAllPlaylistFailed() {
+
+                    }
+                });
+            }
+        });
+        artistAdapter.setOnItemClickListener(new ArtistFavoriteAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Artist artist, int position) {
+                ArtistFragment artistFragment = new ArtistFragment();
+                artistFragment.setArtist(artist);
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, artistFragment).addToBackStack(null).commit();
+            }
+        });
+    }
+    
+    private void initArtist() {
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        rcvArtist.setLayoutManager(layoutManager);
+        artistAdapter = new ArtistFavoriteAdapter(getContext());
+        rcvArtist.setAdapter(artistAdapter);
+        getArtist();
+    }
+
+    private void getArtist() {
+        userModel.getAristOfUser(uid, new UserModel.OnGetArtistFavoriteListener() {
+            @Override
+            public void onCompleted(ArrayList<Artist> artists) {
+                Log.d(TAG, "onCompleted: " + artists.toString());
+                artistAdapter.setArtists(artists);
+                initUI();
+            }
+
+            @Override
+            public void onFailure() {
+                Log.d(TAG, "onFailure: ");
+            }
         });
     }
 

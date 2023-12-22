@@ -1,27 +1,45 @@
 package com.vibe.vibe.fragments;
 
+import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.snackbar.Snackbar;
 import com.vibe.vibe.R;
 import com.vibe.vibe.constants.Application;
+import com.vibe.vibe.constants.Schema;
 import com.vibe.vibe.entities.Song;
+import com.vibe.vibe.models.PlaylistModel;
+import com.vibe.vibe.models.SongModel;
+import com.vibe.vibe.models.UserModel;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -41,7 +59,14 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
     private String mParam2;
     private static final String TAG = MoreOptionBottomSheetFragment.class.getSimpleName();
     private ImageView ivMorePicture;
-    private TextView tvMoreSong, tvMoreArtist, tvLikeArtist,tvAddToPlaylist, tvDownload, tvShare, tvClose;
+    private String[] playlistIds;
+    private String[] playlistNames;
+    private TextView tvMoreSong, tvMoreArtist, tvLikeArtist, tvAddToPlaylist, tvDownload, tvShare, tvClose;
+    private final UserModel userModel = new UserModel();
+    private final PlaylistModel playlistModel = new PlaylistModel();
+    private final SongModel songModel = new SongModel();
+    private String uid;
+    private Song song;
 
     public MoreOptionBottomSheetFragment() {
         // Required empty public constructor
@@ -97,7 +122,8 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
 
         Bundle bundle = getArguments();
         if (bundle != null) {
-            Song song = (Song) bundle.getSerializable(Application.CURRENT_SONG);
+            song = (Song) bundle.getSerializable(Application.CURRENT_SONG);
+            Log.d(TAG, "onCreateView: " + song.toString());
             boolean isLiked = bundle.getBoolean("Like");
             assert song != null;
             Glide.with(requireContext()).load(song.getImageResource()).into(ivMorePicture);
@@ -109,20 +135,144 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
                 tvLikeArtist.setCompoundDrawablesWithIntrinsicBounds(R.drawable.like, 0, 0, 0);
             }
         }
-
+        handleClick();
         return view;
+    }
+
+    private void handleClick() {
+        tvAddToPlaylist.setOnClickListener(v -> {
+            userModel.getConfiguration(uid, Schema.PRIVATE_PLAYLISTS, new UserModel.onGetConfigListener() {
+                @Override
+                public void onCompleted(ArrayList<Map<String, Object>> config) {
+                    if (config == null || config.size() == 0) {
+                        Toast.makeText(getActivity(), "You don't have any playlist", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    playlistIds = new String[config.size()];
+                    playlistNames = new String[config.size()];
+                    for (int i = 0; i < config.size(); i++) {
+                        String id = (String) config.get(i).get("id");
+                        String name = (String) config.get(i).get("name");
+                        playlistIds[i] = id;
+                        playlistNames[i] = name;
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+                    builder.setTitle("Choose playlist");
+                    builder.setItems(playlistNames, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            String playlistId = playlistIds[i];
+                            HashMap<String, Object> data = new HashMap<>();
+                            data.put("songId", song.getId());
+                            data.put("songName", song.getName());
+                            userModel.getConfiguration(uid, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+                                @Override
+                                public void onCompleted(ArrayList<Map<String, Object>> config) {
+                                    Log.d(TAG, "onCompleted: " + config.toString());
+                                    if (config == null) {
+                                        config = new ArrayList<>();
+                                    }
+                                    if (config.size() == 0) {
+                                        config.add(data);
+                                    } else {
+                                        for (int i = 0; i < config.size(); i++) {
+                                            String songId = (String) config.get(i).get("songId");
+                                            if (songId.equals(song.getId())) {
+                                                config.remove(i);
+                                                break;
+                                            }
+                                        }
+                                        config.add(data);
+                                    }
+                                    userModel.addConfiguration(uid, Schema.FAVORITE_SONGS, config, new UserModel.OnAddConfigurationListener() {
+                                        @Override
+                                        public void onAddConfigurationSuccess() {
+                                            Log.d(TAG, "onAddConfigurationSuccess: ");
+                                            playlistModel.addSongToPrivatePlaylistFavorite(uid, playlistId, song, new PlaylistModel.onPlaylistAddListener() {
+                                                @Override
+                                                public void onPlaylistAddSuccess() {
+                                                    Log.d(TAG, "onPlaylistAddSuccess: ");
+                                                    Snackbar.make(getView(), "Add " + song.getName() + " to " + playlistNames[i] + " successfully", Snackbar.LENGTH_SHORT).show();
+                                                }
+
+                                                @Override
+                                                public void onPlaylistAddFailure() {
+                                                    Log.d(TAG, "onPlaylistAddFailure: ");
+                                                }
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onAddConfigurationFailure(String error) {
+                                            Log.d(TAG, "onAddConfigurationFailure: " + error);
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onFailure(String error) {
+                                    Log.d(TAG, "onFailure: " + error);
+                                }
+                            });
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+
+
+                @Override
+                public void onFailure(String error) {
+                    Log.d(TAG, "onFailure: " + error);
+                }
+            });
+        });
+        tvDownload.setOnClickListener(v -> {
+            if (Environment.isExternalStorageManager()) {
+                downloadSong();
+            } else {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
+                intent.setData(uri);
+                getActivity().startActivityForResult(intent, 1000);
+            }
+        });
+    }
+
+    private void downloadSong() {
+        if (getActivity() != null) {
+            songModel.downloadSong(song.getId(), song.getName(), new SongModel.OnSongDownloadListener() {
+                @Override
+                public void onSongDownloadSuccess() {
+                    Snackbar.make(getView(), "Download " + song.getName() + " successfully", Snackbar.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onSongDownloadFailed() {
+                    Toast.makeText(getActivity(), "Download failed", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        tvShare.setOnClickListener(v -> {
+//            Intent intent = new Intent(Intent.ACTION_SEND);
+//            intent.setType("text/plain");
+//            intent.putExtra(Intent.EXTRA_TEXT, song.getLink());
+//            startActivity(Intent.createChooser(intent, "Share"));
+        });
     }
 
 
     private void init(View view) {
-            ivMorePicture = view.findViewById(R.id.ivMorePicture);
-            tvMoreSong = view.findViewById(R.id.tvMoreSong);
-            tvMoreArtist = view.findViewById(R.id.tvMoreArtist);
-            tvLikeArtist = view.findViewById(R.id.tvLikeArtist);
-            tvAddToPlaylist = view.findViewById(R.id.tvAddToPlaylist);
-            tvDownload = view.findViewById(R.id.tvDownload);
-            tvShare = view.findViewById(R.id.tvShare);
-            tvClose = view.findViewById(R.id.tvClose);
-            tvClose.setOnClickListener(v -> dismiss());
+        ivMorePicture = view.findViewById(R.id.ivMorePicture);
+        tvMoreSong = view.findViewById(R.id.tvMoreSong);
+        tvMoreArtist = view.findViewById(R.id.tvMoreArtist);
+        tvLikeArtist = view.findViewById(R.id.tvLikeArtist);
+        tvAddToPlaylist = view.findViewById(R.id.tvAddToPlaylist);
+        tvDownload = view.findViewById(R.id.tvDownload);
+        tvShare = view.findViewById(R.id.tvShare);
+        tvClose = view.findViewById(R.id.tvClose);
+        tvClose.setOnClickListener(v -> dismiss());
+        SharedPreferences sharedPreferences = requireContext().getSharedPreferences(Application.SHARED_PREFERENCES_USER, requireContext().MODE_PRIVATE);
+        uid = sharedPreferences.getString(Application.SHARED_PREFERENCES_UUID, "");
     }
 }

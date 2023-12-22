@@ -117,7 +117,7 @@
                     android:contentDescription="TODO"
                     android:minWidth="48dp"
                     android:minHeight="48dp"
-                    android:src="@drawable/download"
+                    android:src="@drawable/downloaded"
                     />
 
                 <ImageButton
