@@ -114,15 +114,15 @@ public class GenerateQRCodeBottomSheetFragment extends BottomSheetDialogFragment
         if (isSong) {
             qrTitle.setText("Song's QR Code");
             qrDescription.setText("Let share your song to your friends");
-            generateQrCode(song.getName());
+            generateQrCode(song.getName(), song.getId());
         } else if (isAlbum) {
             qrTitle.setText("Album's QR Code");
             qrDescription.setText("Let share your album to your friends");
-            generateQrCode(album.getName());
+            generateQrCode(album.getName(), album.getId());
         } else if (isPlaylist) {
             qrTitle.setText("Playlist's QR Code");
             qrDescription.setText("Let share your playlist to your friends");
-            generateQrCode(album.getName());
+            generateQrCode(album.getName(), album.getId());
         }
         handleClick();
         return view;
@@ -222,14 +222,14 @@ public class GenerateQRCodeBottomSheetFragment extends BottomSheetDialogFragment
         btnShare = view.findViewById(R.id.btnShare);
     }
 
-    private void generateQrCode(String name) {
+    private void generateQrCode(String name, String id) {
         Log.e(TAG, "generate: init qr name: " + name );
         int width = 500;
         int height = 500;
 
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         try {
-            BitMatrix bitMatrix = qrCodeWriter.encode(name, com.google.zxing.BarcodeFormat.QR_CODE, width, height);
+            BitMatrix bitMatrix = qrCodeWriter.encode(id, com.google.zxing.BarcodeFormat.QR_CODE, width, height);
             Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
             for (int x = 0; x < width; x++) {

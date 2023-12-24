@@ -372,20 +372,21 @@ public class SongService extends Service {
         startForeground(1, notification);
     }
 
-        public static IntentFilter getIntentFilter () {
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(Application.ACTION_TO_ACTIVITY);
-            return intentFilter;
-        }
-
-        private PendingIntent getPendingIntent (Context context,int action){
-            Intent intent = new Intent(this, SongService.class);
-            Bundle bundle = new Bundle();
-            bundle.putSerializable(Application.SONGS_ARG, songs);
-            bundle.putInt(Application.SONG_INDEX, index);
-            intent.putExtra("action", action);
-            bundle.putSerializable(Application.CURRENT_SONG, song);
-            intent.putExtras(bundle);
-            return PendingIntent.getBroadcast(context.getApplicationContext(), action, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        }
+    public static IntentFilter getIntentFilter() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Application.ACTION_TO_ACTIVITY);
+        return intentFilter;
     }
+
+    private PendingIntent getPendingIntent(Context context, int action) {
+        Log.e(TAG, "getPendingIntent: " + action);
+        Intent intent = new Intent(this, SongService.class);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(Application.SONGS_ARG, songs);
+        bundle.putInt(Application.SONG_INDEX, index);
+        intent.putExtra("action", action);
+        bundle.putSerializable(Application.CURRENT_SONG, song);
+        intent.putExtras(bundle);
+        return PendingIntent.getBroadcast(context.getApplicationContext(), action, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+}

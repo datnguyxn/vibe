@@ -38,12 +38,14 @@ import com.google.zxing.qrcode.QRCodeReader;
 import com.vibe.vibe.R;
 import com.vibe.vibe.constants.Application;
 import com.vibe.vibe.entities.Album;
+import com.vibe.vibe.entities.Playlist;
 import com.vibe.vibe.models.AlbumModel;
 import com.vibe.vibe.models.PlaylistModel;
 import com.vibe.vibe.models.SongModel;
 import com.vibe.vibe.models.UserModel;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -300,30 +302,45 @@ public class BarCodeFragment extends Fragment {
 
             @Override
             public void onAlbumNotExist() {
-                Log.e(TAG, "onGetAllPlaylistFailed: " + qrCodeContents);
-                Snackbar.make(getView(), "Invalid QR Code", Snackbar.LENGTH_SHORT).show();
-//                playlistModel.getPlaylistOfUser(uid, qrCodeContents, new PlaylistModel.onGetAllPlaylistOfUserListener() {
-//                    @Override
-//                    public void onGetAllPlaylistSuccess(Album album) {
-//                        PlaylistFragment playlistFragment = new PlaylistFragment();
-//                        Bundle bundle = new Bundle();
-//                        bundle.putSerializable("album", album);
-//                        bundle.putString("playlist", "This is a playlist");
-//                        bundle.putString("SFP", album.getId());
-//                        playlistFragment.setArguments(bundle);
-//                        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, playlistFragment).addToBackStack(null).commit();
-//                        barcodeDetector.release();
-//                        cameraSource.stop();
-//                    }
-//
-//                    @Override
-//                    public void onGetAllPlaylistFailed() {
-//                        Log.e(TAG, "onGetAllPlaylistFailed: " + qrCodeContents);
-//                        Snackbar.make(getView(), "Invalid QR Code", Snackbar.LENGTH_SHORT).show();
-//                        barcodeDetector.release();
-//                        cameraSource.stop();
-//                    }
-//                });
+                playlistModel.getPrivatePlaylist(uid, new PlaylistModel.OnGetPlaylistListener() {
+                    @Override
+                    public void onGetPlaylist(ArrayList<Playlist> playlists) {
+                        for (Playlist playlist: playlists) {
+                            if (playlist.getId().equals(qrCodeContents)) {
+                                playlistModel.getPlaylistOfUser(uid, playlist.getId(), new PlaylistModel.onGetAllPlaylistOfUserListener() {
+                                    @Override
+                                    public void onGetAllPlaylistSuccess(Album album) {
+                                        PlaylistFragment playlistFragment = new PlaylistFragment();
+                                        Bundle bundle = new Bundle();
+                                        bundle.putSerializable("album", album);
+                                        bundle.putString("playlist", "This is a playlist");
+                                        bundle.putString("SFP", album.getId());
+                                        playlistFragment.setArguments(bundle);
+                                        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, playlistFragment).addToBackStack(null).commit();
+                                        barcodeDetector.release();
+                                        cameraSource.stop();
+                                    }
+
+                                    @Override
+                                    public void onGetAllPlaylistFailed() {
+                                        Log.e(TAG, "onGetAllPlaylistFailed: " + qrCodeContents);
+                                        Snackbar.make(getView(), "Invalid QR Code", Snackbar.LENGTH_SHORT).show();
+                                        barcodeDetector.release();
+                                        cameraSource.stop();
+                                    }
+                                });
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onGetPlaylistFailed() {
+                        Log.e(TAG, "onGetAllPlaylistFailed: " + qrCodeContents);
+                        Snackbar.make(getView(), "Invalid QR Code", Snackbar.LENGTH_SHORT).show();
+                        barcodeDetector.release();
+                        cameraSource.stop();
+                    }
+                });
             }
         });
     }

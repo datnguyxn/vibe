@@ -70,6 +70,7 @@ public class UploadAdapter extends RecyclerView.Adapter<UploadAdapter.UploadView
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(Application.CURRENT_SONG, song);
                 MoreOptionBottomSheetFragment bottomSheetFragment = new MoreOptionBottomSheetFragment();
+                bundle.putString("SFP", "");
                 bottomSheetFragment.setArguments(bundle);
                 bottomSheetFragment.show(((FragmentActivity) context).getSupportFragmentManager(), bottomSheetFragment.getTag());
             }
