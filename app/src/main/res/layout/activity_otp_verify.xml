@@ -51,7 +51,7 @@
                 android:background="@android:color/transparent"
                 android:hint="@string/enter_your_otp"
                 android:inputType="number"
-                android:textColor="@color/fifty_percent_black_overlay"
+                android:textColor="@color/FlatWhite"
                 android:textColorHint="@color/FlatWhite"
                 android:textSize="14sp"
                 android:textStyle="bold"

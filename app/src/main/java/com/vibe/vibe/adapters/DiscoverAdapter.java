@@ -2,6 +2,7 @@ package com.vibe.vibe.adapters;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,7 +55,12 @@ public class DiscoverAdapter extends RecyclerView.Adapter<DiscoverAdapter.Discov
         Glide.with(context).load(album.getImage()).into(holder.ivItem);
         holder.itemHome.setOnClickListener(v -> {
             PlaylistFragment playlistFragment = new PlaylistFragment();
-            playlistFragment.setAlbum(album);
+//            playlistFragment.setAlbum(album);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("album", album);
+            bundle.putString("SFP", "");
+            bundle.putString("playlist", "");
+            playlistFragment.setArguments(bundle);
             AppCompatActivity activity = (AppCompatActivity) v.getContext();
             activity.getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, playlistFragment).addToBackStack(null).commit();
         });

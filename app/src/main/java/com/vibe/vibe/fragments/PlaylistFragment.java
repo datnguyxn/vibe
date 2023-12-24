@@ -76,6 +76,7 @@ public class PlaylistFragment extends Fragment {
     private Song currentSong;
     private int index = 0;
     private boolean isPlaylist = false;
+    private boolean isSongPrivatePlaylist = false;
     private String uid;
     private final PlaylistModel playlistModel = new PlaylistModel();
     private final UserModel userModel = new UserModel();
@@ -143,6 +144,11 @@ public class PlaylistFragment extends Fragment {
             } else {
                 isPlaylist = true;
             }
+            if (getArguments().getString("SFP").equals("")) {
+                isSongPrivatePlaylist = false;
+            } else {
+                isSongPrivatePlaylist = true;
+            }
         }
     }
 
@@ -155,7 +161,7 @@ public class PlaylistFragment extends Fragment {
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(onReceiver, SongService.getIntentFilter());
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         rvplaylist_songs.setLayoutManager(layoutManager);
-        playlistSongAdapter = new PlaylistSongAdapter(getContext());
+        playlistSongAdapter = new PlaylistSongAdapter(getContext(), album.getId(), isSongPrivatePlaylist);
         rvplaylist_songs.setAdapter(playlistSongAdapter);
         playlistSongAdapter.setSongs(songs);
         playlist_name.setText(album.getName());
@@ -274,8 +280,7 @@ public class PlaylistFragment extends Fragment {
         imgBackPlaylistToHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                HomeFragment homeFragment = new HomeFragment();
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, homeFragment).commit();
+                getActivity().getSupportFragmentManager().popBackStack();
             }
 
         });

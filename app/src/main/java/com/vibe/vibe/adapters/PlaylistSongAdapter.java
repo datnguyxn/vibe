@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide;
 import com.vibe.vibe.R;
 import com.vibe.vibe.constants.Application;
 import com.vibe.vibe.constants.Schema;
+import com.vibe.vibe.entities.Album;
 import com.vibe.vibe.entities.Song;
 import com.vibe.vibe.fragments.MoreOptionBottomSheetFragment;
 import com.vibe.vibe.models.UserModel;
@@ -33,6 +34,8 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
     private Context context;
     private String id;
     private boolean isLiked = false;
+    private String playlistId;
+    private boolean isSongPrivatePlaylist = false;
 
     public interface OnItemClickListener {
         void onItemClick(Song song, int position);
@@ -46,11 +49,13 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
 
     private final UserModel userModel = new UserModel();
 
-    public PlaylistSongAdapter(Context context) {
+    public PlaylistSongAdapter(Context context, String playlistId, boolean isSongPrivatePlaylist) {
         this.context = context;
         this.songs = new ArrayList<>();
         SharedPreferences sharedPreferences = context.getSharedPreferences(Application.SHARED_PREFERENCES_USER, Context.MODE_PRIVATE);
         id = sharedPreferences.getString(Application.SHARED_PREFERENCES_UUID, "");
+        this.playlistId = playlistId;
+        this.isSongPrivatePlaylist = isSongPrivatePlaylist;
     }
 
     public void setSongs(ArrayList<Song> songs) {
@@ -76,34 +81,15 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
         holder.tvSongTitle.setText(song.getName());
         holder.tvSongArtist.setText(song.getArtistName());
         Glide.with(context).load(song.getImageResource()).into(holder.imageSong);
-        userModel.getConfiguration(id, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
-            @Override
-            public void onCompleted(ArrayList<Map<String, Object>> config) {
-                if (config == null) {
-                    isLiked = false;
-                    holder.ivLikeStatus.setImageResource(R.drawable.like);
-                    return;
-                } else {
-                    for (Map<String, Object> map : config) {
-                        if (Objects.equals(map.get(Schema.SONG_ID), song.getId())) {
-                            isLiked = true;
-                            holder.ivLikeStatus.setImageResource(R.drawable.unlike);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(String error) {
-                Log.d(TAG, "onFailure: " + error);
-            }
-        });
         holder.ivMoreOption.setOnClickListener(v -> {
             Log.d(TAG, "onBindViewHolder: " + position);
             Bundle bundle = new Bundle();
             bundle.putSerializable(Application.CURRENT_SONG, song);
-            bundle.putBoolean("Like", isLiked);
+            if (isSongPrivatePlaylist) {
+                bundle.putString("SFP", playlistId);
+            } else {
+                bundle.putString("SFP", "");
+            }
             MoreOptionBottomSheetFragment bottomSheetFragment = new MoreOptionBottomSheetFragment();
             bottomSheetFragment.setArguments(bundle);
             bottomSheetFragment.show(((FragmentActivity) context).getSupportFragmentManager(), bottomSheetFragment.getTag());
@@ -116,16 +102,16 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
     }
 
     public class PlaylistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private ImageView imageSong, ivLikeStatus, ivMoreOption;
+    private ImageView imageSong, ivMoreOption;
         private TextView tvSongTitle, tvSongArtist;
         public PlaylistViewHolder(@NonNull View itemView) {
             super(itemView);
             imageSong = itemView.findViewById(R.id.imageSong);
-            ivLikeStatus = itemView.findViewById(R.id.ivLikeStatus);
             ivMoreOption = itemView.findViewById(R.id.ivMoreOption);
             tvSongTitle = itemView.findViewById(R.id.tvSongTitle);
             tvSongArtist = itemView.findViewById(R.id.tvSongArtist);
             itemView.setOnClickListener(this);
+            ivMoreOption.setOnClickListener(this);
         }
 
         @Override

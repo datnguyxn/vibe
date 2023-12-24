@@ -220,6 +220,7 @@ public class SearchFragment extends Fragment {
 
                 PlayerFragment playerFragment = new PlayerFragment();
                 playerFragment.setArguments(bundle);
+                playerFragment.hideNavigationViews();
                 fragmentTransaction.replace(R.id.frameLayout, playerFragment);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
@@ -237,6 +238,7 @@ public class SearchFragment extends Fragment {
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("album", album);
                         bundle.putString("playlist", "");
+                        bundle.putString("SFP", "");
                         playlistFragment.setArguments(bundle);
                         getActivity().getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.frameLayout, playlistFragment)

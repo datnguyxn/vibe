@@ -98,16 +98,22 @@ public class HomeFragment extends Fragment {
     private boolean isPlaying = false;
     private boolean isShuffle = false;
     private boolean isRepeat = false;
+    private int index = 0;
+    private int seekTo = 0;
     private BroadcastReceiver onReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
+                int action = bundle.getInt(Application.ACTION_TYPE);
                 isPlaying = bundle.getBoolean(Application.IS_PLAYING);
+                song = (Song) bundle.getSerializable(Application.CURRENT_SONG);
+                index = bundle.getInt(Application.SONG_INDEX);
+                seekTo = bundle.getInt(Application.SEEK_BAR_PROGRESS, 0);
+                Log.w(TAG, "onReceive456: " + seekTo);
                 isShuffle = bundle.getBoolean(Application.IS_SHUFFLE, false);
                 isRepeat = bundle.getBoolean(Application.IS_REPEAT, false);
-
-                int action = bundle.getInt(Application.ACTION_TYPE);
+                songs = (ArrayList<Song>) bundle.getSerializable(Application.SONGS_ARG);
                 Log.e(TAG, "onReceiveHomeFragment: receiver " + action + " " + isPlaying + " isShuffle: " + isShuffle + " isRepeat: " + isRepeat);
                 handleActionReceiveForHome(action);
             }
@@ -316,6 +322,8 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onAlbumFound(Album album) {
                         bundle.putSerializable("album", album);
+                        bundle.putString("SFP", "");
+                        bundle.putString("playlist", "");
                         PlaylistFragment playlistFragment = new PlaylistFragment();
                         playlistFragment.setArguments(bundle);
 //                playlistFragment.setAlbum(playlist);
@@ -341,7 +349,11 @@ public class HomeFragment extends Fragment {
         Glide.with(getContext()).load(album.getImage()).into(ivAlbum);
         ivAlbum.setOnClickListener(v -> {
             PlaylistFragment playlistFragment = new PlaylistFragment();
-            playlistFragment.setAlbum(album);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("album", album);
+            bundle.putString("SFP", "");
+            bundle.putString("playlist", "");
+            playlistFragment.setArguments(bundle);
             getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, playlistFragment).addToBackStack(null).commit();
         });
         tvAlbum.setText(album.getName());

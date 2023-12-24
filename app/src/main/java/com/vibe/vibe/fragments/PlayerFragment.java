@@ -148,12 +148,7 @@ public class PlayerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 sendBroadcastToService(Action.ACTION_PLAY_BACK);
-                HomeFragment homeFragment = new HomeFragment();
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-                fragmentTransaction.replace(R.id.frameLayout, homeFragment);
-                fragmentTransaction.commit();
+                getActivity().onBackPressed();
                 showNavigationViews();
             }
         });
@@ -164,6 +159,7 @@ public class PlayerFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putSerializable(Application.CURRENT_SONG, song);
             bundle.putBoolean("Like", isLike);
+            bundle.putString("SFP", "");
             moreOptionBottomSheetFragment.setArguments(bundle);
             moreOptionBottomSheetFragment.show(getChildFragmentManager(), moreOptionBottomSheetFragment.getTag());
         });
@@ -347,6 +343,12 @@ public class PlayerFragment extends Fragment {
     private void showNavigationViews() {
         if (mainActivityListener != null) {
             mainActivityListener.showNavigationViews();
+        }
+    }
+
+    public void hideNavigationViews() {
+        if (mainActivityListener != null) {
+            mainActivityListener.hideNavigationViews();
         }
     }
 

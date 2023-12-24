@@ -43,7 +43,7 @@
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:textColorHint="@color/FlatWhite"
-                android:textColor="@color/fifty_percent_black_overlay"
+                android:textColor="@color/FlatWhite"
                 android:inputType="text"
                 tools:ignore="TouchTargetSizeCheck" />
 
@@ -68,7 +68,7 @@
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:textColorHint="@color/FlatWhite"
-                android:textColor="@color/fifty_percent_black_overlay"
+                android:textColor="@color/FlatWhite"
                 android:inputType="phone"
                 tools:ignore="TouchTargetSizeCheck" />
 
@@ -94,7 +94,7 @@
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:textColorHint="@color/FlatWhite"
-                android:textColor="@color/fifty_percent_black_overlay"
+                android:textColor="@color/FlatWhite"
                 android:inputType="textPassword"
                 tools:ignore="TouchTargetSizeCheck" />
 

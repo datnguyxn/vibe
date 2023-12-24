@@ -288,6 +288,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
         bottomAppBar.setBackgroundColor(getResources().getColor(R.color.black));
     }
 
+    @Override
+    public void hideNavigationViews() {
+        bottomCurrentSong.setVisibility(View.GONE);
+        bottomAppBar.setBackgroundColor(getResources().getColor(R.color.transparent));
+    }
+
     private void handlePermissionForActivity() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             String[] permissions = new String[]{

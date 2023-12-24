@@ -78,6 +78,21 @@
             android:drawablePadding="@dimen/_20dp"/>
 
         <TextView
+            android:id="@+id/tvRemoveFromPlaylist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Remove from this playlist"
+            android:drawableLeft="@drawable/delete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvAddToPlaylist"
+            android:textColor="@color/FlatWhite"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/_30dp"
+            android:layout_marginStart="@dimen/_40dp"
+            android:drawablePadding="@dimen/_20dp"/>
+
+        <TextView
             android:id="@+id/tvDownload"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -85,7 +100,7 @@
             android:drawableLeft="@drawable/download"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvAddToPlaylist"
+            app:layout_constraintTop_toBottomOf="@+id/tvRemoveFromPlaylist"
             android:textColor="@color/FlatWhite"
             android:textStyle="bold"
             android:layout_marginTop="@dimen/_30dp"

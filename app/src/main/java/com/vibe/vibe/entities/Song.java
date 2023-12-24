@@ -44,7 +44,7 @@ public class Song implements Serializable {
         this.genres = genres;
     }
 
-    public Song(String id, String name, String artistId, String imageResource, String resource, int duration, String releaseData) {
+    public Song(String id, String name, String artistId, String imageResource, String resource, int duration, String releaseData, String artistName) {
         this.id = id;
         this.name = name;
         this.artistId = artistId;
@@ -52,6 +52,7 @@ public class Song implements Serializable {
         this.resource = resource;
         this.duration = duration;
         this.releaseDate = releaseData;
+        this.artistName = artistName;
     }
 
     //getters & setters

@@ -61,12 +61,14 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
     private ImageView ivMorePicture;
     private String[] playlistIds;
     private String[] playlistNames;
-    private TextView tvMoreSong, tvMoreArtist, tvLikeArtist, tvAddToPlaylist, tvDownload, tvShare, tvClose;
+    private TextView tvMoreSong, tvMoreArtist, tvLikeArtist, tvAddToPlaylist, tvDownload, tvShare, tvClose, tvRemoveFromPlaylist;
     private final UserModel userModel = new UserModel();
     private final PlaylistModel playlistModel = new PlaylistModel();
     private final SongModel songModel = new SongModel();
     private String uid;
     private Song song;
+    private String playlistId;
+    private boolean isLiked = false;
 
     public MoreOptionBottomSheetFragment() {
         // Required empty public constructor
@@ -124,7 +126,11 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
         if (bundle != null) {
             song = (Song) bundle.getSerializable(Application.CURRENT_SONG);
             Log.d(TAG, "onCreateView: " + song.toString());
-            boolean isLiked = bundle.getBoolean("Like");
+            checkSongAddedToFavorite();
+            playlistId = bundle.getString("SFP");
+            if (playlistId.equals("")) {
+                tvRemoveFromPlaylist.setVisibility(View.GONE);
+            }
             assert song != null;
             Glide.with(requireContext()).load(song.getImageResource()).into(ivMorePicture);
             tvMoreSong.setText(song.getName());
@@ -237,6 +243,54 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
                 getActivity().startActivityForResult(intent, 1000);
             }
         });
+        tvRemoveFromPlaylist.setOnClickListener(v -> {
+            userModel.getConfiguration(uid, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+                @Override
+                public void onCompleted(ArrayList<Map<String, Object>> config) {
+                    if (config == null) {
+                        config = new ArrayList<>();
+                    }
+                    if (config.size() == 0) {
+                        return;
+                    } else {
+                        for (int i = 0; i < config.size(); i++) {
+                            if (config.get(i).get("songId").equals(song.getId())) {
+                                config.remove(i);
+                                break;
+                            }
+                        }
+                    }
+                    userModel.addConfiguration(uid, Schema.FAVORITE_SONGS, config, new UserModel.OnAddConfigurationListener() {
+                        @Override
+                        public void onAddConfigurationSuccess() {
+                            playlistModel.removeSongToPrivatePlaylistFavorite(uid, playlistId, song, new PlaylistModel.onRemoveSongFromPlaylistListener() {
+                                @Override
+                                public void onRemoveSongFromPlaylistSuccess() {
+                                    Snackbar.make(getView(), "Remove " + song.getName() + " from " + playlistId + " successfully", Snackbar.LENGTH_SHORT).show();
+                                    Log.d(TAG, "onRemoveSongFromPlaylistSuccess: ");
+                                }
+
+                                @Override
+                                public void onRemoveSongFromPlaylistFailure(String error) {
+                                    Snackbar.make(getView(), "Remove " + song.getName() + " from " + playlistId + " failed", Snackbar.LENGTH_SHORT).show();
+                                    Log.d(TAG, "onRemoveSongFromPlaylistFailure: " + error);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onAddConfigurationFailure(String error) {
+                            Log.d(TAG, "onAddConfigurationFailure: " + error);
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    Log.d(TAG, "onFailure: " + error);
+                }
+            });
+        });
     }
 
     private void downloadSong() {
@@ -261,6 +315,32 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
         });
     }
 
+    private void checkSongAddedToFavorite() {
+        userModel.getConfiguration(uid, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+            @Override
+            public void onCompleted(ArrayList<Map<String, Object>> config) {
+                if (config == null) {
+                    isLiked = false;
+                    tvLikeArtist.setCompoundDrawablesWithIntrinsicBounds(R.drawable.like, 0, 0, 0);
+                    return;
+                } else {
+                    for (Map<String, Object> map : config) {
+                        if (Objects.equals(map.get(Schema.SONG_ID), song.getId())) {
+                            isLiked = true;
+                            tvLikeArtist.setCompoundDrawablesWithIntrinsicBounds(R.drawable.unlike, 0, 0, 0);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.d(TAG, "onFailure: " + error);
+            }
+        });
+    }
+
 
     private void init(View view) {
         ivMorePicture = view.findViewById(R.id.ivMorePicture);
@@ -268,6 +348,7 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
         tvMoreArtist = view.findViewById(R.id.tvMoreArtist);
         tvLikeArtist = view.findViewById(R.id.tvLikeArtist);
         tvAddToPlaylist = view.findViewById(R.id.tvAddToPlaylist);
+        tvRemoveFromPlaylist = view.findViewById(R.id.tvRemoveFromPlaylist);
         tvDownload = view.findViewById(R.id.tvDownload);
         tvShare = view.findViewById(R.id.tvShare);
         tvClose = view.findViewById(R.id.tvClose);

@@ -27,7 +27,7 @@ public class SongModel extends Model {
 
     public interface OnSongUploadListener {
         void onSongUploadSuccess();
-
+        void onSongUploadProgress(UploadTask.TaskSnapshot taskSnapshot);
         void onSongUploadFailed();
     }
 
@@ -69,7 +69,7 @@ public class SongModel extends Model {
 
         uploadTask.addOnProgressListener(taskSnapshot -> {
                     Log.d(TAG, "uploadSong: " + taskSnapshot.getBytesTransferred() + " / " + taskSnapshot.getTotalByteCount());
-                    listener.onSongUploadSuccess();
+                    listener.onSongUploadProgress(taskSnapshot);
                 })
                 .addOnPausedListener(taskSnapshot -> {
                     Log.d(TAG, "uploadSong: upload paused");

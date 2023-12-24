@@ -12,7 +12,7 @@
     android:padding="10dp">
 
     <ImageView
-        android:id="@+id/imageSong"
+        android:id="@+id/imageSongUpload"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:src="@drawable/current_song" />
@@ -26,7 +26,7 @@
         android:layout_marginEnd="8dp">
 
         <TextView
-            android:id="@+id/tvSongTitle"
+            android:id="@+id/tvSongTitleUpload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Pretty Girl - Cheat Codes X CADE"
@@ -34,7 +34,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tvSongArtist"
+            android:id="@+id/tvSongArtistUpload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Maggie Lindemann, Cheat Codes"
@@ -42,7 +42,7 @@
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/ivMoreOption"
+        android:id="@+id/ivMoreOptionUpload"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_20dp"

@@ -104,7 +104,7 @@ public class ArtistFragment extends Fragment {
         Glide.with(getActivity()).load(artist.getThumbnail()).into(artist_thumb);
         getPlaylistOfArtist();
         handleClick();
-        checkAritstAddedToFavorite();
+        checkArtistAddedToFavorite();
         return view;
     }
 
@@ -116,11 +116,7 @@ public class ArtistFragment extends Fragment {
         ivLikeStatus = (ImageView) view.findViewById(R.id.ivLikeArtist);
         tvArtistAlbumsName = (TextView) view.findViewById(R.id.tvArtistAlbumsName);
         imgBackFromArtistToHome.setOnClickListener(v -> {
-            HomeFragment homeFragment = new HomeFragment();
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, homeFragment, "findThisFragment")
-                    .addToBackStack(null)
-                    .commit();
+            getActivity().getSupportFragmentManager().popBackStack();
         });
         SharedPreferences sharedPreferences = getContext().getSharedPreferences(Application.SHARED_PREFERENCES_USER, getContext().MODE_PRIVATE);
         uid = sharedPreferences.getString(Application.SHARED_PREFERENCES_UUID, "");
@@ -269,7 +265,7 @@ public class ArtistFragment extends Fragment {
         });
     }
 
-    private void checkAritstAddedToFavorite() {
+    private void checkArtistAddedToFavorite() {
         userModel.getConfiguration(uid, Schema.FAVORITE_ARTISTS, new UserModel.onGetConfigListener() {
             @Override
             public void onCompleted(ArrayList<Map<String, Object>> config) {

@@ -85,11 +85,7 @@ public class SettingFragment extends Fragment implements OptionEditProfileBottom
         init(convertView);
         setProfileInfo();
         imgBackToHome.setOnClickListener(v -> {
-            HomeFragment homeFragment = new HomeFragment();
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, homeFragment, "findThisFragment")
-                    .addToBackStack(null)
-                    .commit();
+            getActivity().getSupportFragmentManager().popBackStack();
         });
         // TODO: Edit profile
         tvEditProfile.setOnClickListener(v -> {
@@ -112,6 +108,13 @@ public class SettingFragment extends Fragment implements OptionEditProfileBottom
         tvProfileInfo = convertView.findViewById(R.id.tvProfileInfo);
         tvEditProfile = convertView.findViewById(R.id.tvEditProfile);
         tvUploadSongs = convertView.findViewById(R.id.tvUploadSong);
+        tvUploadSongs.setOnClickListener(v -> {
+            UploadSongFragment uploadSongFragment = new UploadSongFragment();
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.frameLayout, uploadSongFragment, "findThisFragment")
+                    .addToBackStack(null)
+                    .commit();
+        });
     }
 
     private void setProfileInfo() {
