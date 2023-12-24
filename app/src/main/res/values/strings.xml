@@ -53,4 +53,5 @@
     <string name="share">Share</string>
     <string name="add_new_playlist">Add New Playlist</string>
     <string name="give_your_playlist_a_name">Give your playlist a name</string>
+    <string name="descrption">Scan Qr to enjoy music with your friends</string>
 </resources>

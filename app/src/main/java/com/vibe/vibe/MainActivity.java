@@ -541,6 +541,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
 //            refund to to main activity again
             handleBottomBehavior();
         }
+        if (requestCode == BarCodeFragment.REQUEST_CAMERA_PERMISSION) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
+                replaceFragment(new BarCodeFragment());
+            } else {
+                Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override

@@ -244,52 +244,63 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
             }
         });
         tvRemoveFromPlaylist.setOnClickListener(v -> {
-            userModel.getConfiguration(uid, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+            builder.setTitle("Remove from playlist");
+            builder.setMessage("Are you sure you want to remove this song from playlist?");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 @Override
-                public void onCompleted(ArrayList<Map<String, Object>> config) {
-                    if (config == null) {
-                        config = new ArrayList<>();
-                    }
-                    if (config.size() == 0) {
-                        return;
-                    } else {
-                        for (int i = 0; i < config.size(); i++) {
-                            if (config.get(i).get("songId").equals(song.getId())) {
-                                config.remove(i);
-                                break;
-                            }
-                        }
-                    }
-                    userModel.addConfiguration(uid, Schema.FAVORITE_SONGS, config, new UserModel.OnAddConfigurationListener() {
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    userModel.getConfiguration(uid, Schema.FAVORITE_SONGS, new UserModel.onGetConfigListener() {
                         @Override
-                        public void onAddConfigurationSuccess() {
-                            playlistModel.removeSongToPrivatePlaylistFavorite(uid, playlistId, song, new PlaylistModel.onRemoveSongFromPlaylistListener() {
+                        public void onCompleted(ArrayList<Map<String, Object>> config) {
+                            if (config == null) {
+                                config = new ArrayList<>();
+                            }
+                            if (config.size() == 0) {
+                                return;
+                            } else {
+                                for (int i = 0; i < config.size(); i++) {
+                                    if (config.get(i).get("songId").equals(song.getId())) {
+                                        config.remove(i);
+                                        break;
+                                    }
+                                }
+                            }
+                            userModel.addConfiguration(uid, Schema.FAVORITE_SONGS, config, new UserModel.OnAddConfigurationListener() {
                                 @Override
-                                public void onRemoveSongFromPlaylistSuccess() {
-                                    Snackbar.make(getView(), "Remove " + song.getName() + " from " + playlistId + " successfully", Snackbar.LENGTH_SHORT).show();
-                                    Log.d(TAG, "onRemoveSongFromPlaylistSuccess: ");
+                                public void onAddConfigurationSuccess() {
+                                    playlistModel.removeSongToPrivatePlaylistFavorite(uid, playlistId, song, new PlaylistModel.onRemoveSongFromPlaylistListener() {
+                                        @Override
+                                        public void onRemoveSongFromPlaylistSuccess() {
+                                            Snackbar.make(getView(), "Remove " + song.getName() + " from " + "this playlist" + " successfully", Snackbar.LENGTH_SHORT).show();
+                                            Log.d(TAG, "onRemoveSongFromPlaylistSuccess: ");
+                                        }
+
+                                        @Override
+                                        public void onRemoveSongFromPlaylistFailure(String error) {
+                                            Snackbar.make(getView(), "Remove " + song.getName() + " from " + "this playlist" + " failed", Snackbar.LENGTH_SHORT).show();
+                                            Log.d(TAG, "onRemoveSongFromPlaylistFailure: " + error);
+                                        }
+                                    });
                                 }
 
                                 @Override
-                                public void onRemoveSongFromPlaylistFailure(String error) {
-                                    Snackbar.make(getView(), "Remove " + song.getName() + " from " + playlistId + " failed", Snackbar.LENGTH_SHORT).show();
-                                    Log.d(TAG, "onRemoveSongFromPlaylistFailure: " + error);
+                                public void onAddConfigurationFailure(String error) {
+                                    Log.d(TAG, "onAddConfigurationFailure: " + error);
                                 }
                             });
                         }
 
                         @Override
-                        public void onAddConfigurationFailure(String error) {
-                            Log.d(TAG, "onAddConfigurationFailure: " + error);
+                        public void onFailure(String error) {
+                            Log.d(TAG, "onFailure: " + error);
                         }
                     });
                 }
-
-                @Override
-                public void onFailure(String error) {
-                    Log.d(TAG, "onFailure: " + error);
-                }
             });
+            builder.setNegativeButton("No", (dialog, which) -> dialog.dismiss());
+            AlertDialog dialog = builder.create();
+            dialog.show();
         });
     }
 
@@ -308,10 +319,13 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
             });
         }
         tvShare.setOnClickListener(v -> {
-//            Intent intent = new Intent(Intent.ACTION_SEND);
-//            intent.setType("text/plain");
-//            intent.putExtra(Intent.EXTRA_TEXT, song.getLink());
-//            startActivity(Intent.createChooser(intent, "Share"));
+            GenerateQRCodeBottomSheetFragment fragment = new GenerateQRCodeBottomSheetFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("song", song);
+            bundle.putString("isSong", "isSong");
+            bundle.putString("isAlbum", "");
+            fragment.setArguments(bundle);
+            fragment.show(getFragmentManager(), fragment.getTag());
         });
     }
 

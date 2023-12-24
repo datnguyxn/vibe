@@ -166,6 +166,9 @@ public class PlaylistFragment extends Fragment {
         playlistSongAdapter.setSongs(songs);
         playlist_name.setText(album.getName());
         playlist_size.setText(songs.size() + " songs");
+        if (album.getName().equals("Liked Songs")) {
+            share.setVisibility(View.GONE);
+        }
         if (!isPlaylist) {
             moreOptions.setVisibility(View.GONE);
         } else {
@@ -438,6 +441,21 @@ public class PlaylistFragment extends Fragment {
                     }
                 });
             }
+        });
+        share.setOnClickListener(v -> {
+            GenerateQRCodeBottomSheetFragment generateQRCodeBottomSheetFragment = new GenerateQRCodeBottomSheetFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString("isSong", "");
+            bundle.putSerializable("album", album);
+            if (!isPlaylist) {
+                bundle.putString("isAlbum", "isAlbum");
+                bundle.putString("isPlaylist", "");
+            } else {
+                bundle.putString("isAlbum", "");
+                bundle.putString("isPlaylist", "isPlaylist");
+            }
+            generateQRCodeBottomSheetFragment.setArguments(bundle);
+            generateQRCodeBottomSheetFragment.show(getFragmentManager(), generateQRCodeBottomSheetFragment.getTag());
         });
     }
 
