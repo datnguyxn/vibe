@@ -174,16 +174,31 @@ public class MainActivity extends AppCompatActivity implements MainActivityListe
                     // change icon home_fill in menu bottom
                     // change icon home in menu drawer
                     clearBottomMenuIcon();
+                    if (isPlaying) {
+                        bottomCurrentSong.setVisibility(View.VISIBLE);
+                    } else {
+                        bottomCurrentSong.setVisibility(View.GONE);
+                    }
                     item.setIcon(R.drawable.home_fill);
                     navigationView.setCheckedItem(R.id.nav_home);
                     replaceFragment(new HomeFragment());
                     return true;
                 } else if (item.getItemId() == R.id.bottom_search) {
+                    if (isPlaying) {
+                        bottomCurrentSong.setVisibility(View.VISIBLE);
+                    } else {
+                        bottomCurrentSong.setVisibility(View.GONE);
+                    }
                     clearBottomMenuIcon();
                     item.setIcon(R.drawable.search_fill);
                     replaceFragment(new SearchFragment());
                     return true;
                 } else if (item.getItemId() == R.id.bottom_library) {
+                    if (isPlaying) {
+                        bottomCurrentSong.setVisibility(View.VISIBLE);
+                    } else {
+                        bottomCurrentSong.setVisibility(View.GONE);
+                    }
                     clearBottomMenuIcon();
                     item.setIcon(R.drawable.lib_fill);
                     replaceFragment(new LibraryFragment());

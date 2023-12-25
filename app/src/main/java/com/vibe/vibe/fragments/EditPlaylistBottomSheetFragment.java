@@ -193,6 +193,7 @@ public class EditPlaylistBottomSheetFragment extends BottomSheetDialogFragment {
                                     Bundle bundle = new Bundle();
                                     bundle.putSerializable("album", album);
                                     bundle.putString("playlist", "This is a playlist");
+                                    bundle.putString("SFP", album.getId());
                                     playlistFragment.setArguments(bundle);
                                     getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, playlistFragment).addToBackStack(null).commit();
                                     dismiss();

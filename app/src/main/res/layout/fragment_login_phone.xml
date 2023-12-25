@@ -54,7 +54,7 @@
                 android:background="@android:color/transparent"
                 android:hint="@string/phone_number"
                 android:inputType="phone"
-                android:textColor="@color/fifty_percent_black_overlay"
+                android:textColor="@color/FlatWhite"
                 android:textColorHint="#A9B1C7"
                 android:textSize="14sp"
                 android:textStyle="bold"
