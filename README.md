@@ -5,7 +5,7 @@ Dive into the world of music with Vibe, an innovative music application designed
 - 52100176 - Nguyễn Trọng Đạt
 - 52100916 - Trịnh Lâm Như
 
-- ### Prerequisites
+### Prerequisites
 This is an example of how to list things you need to use the software and how to install them.
 *  JDK 11 [https://www.oracle.com/in/java/technologies/javase/jdk11-archive-downloads.html]
 * Android Studio Latest version.
