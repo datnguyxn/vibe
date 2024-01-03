@@ -6,4 +6,7 @@
     <item
         android:id="@+id/deletePlaylist"
         android:title="Delete Playlist" />
+    <item
+        android:id="@+id/stopAfterMinutes"
+        android:title="Sleep Mode" />
 </menu>

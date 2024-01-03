@@ -8,10 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -49,6 +51,10 @@ public class SongService extends Service {
     private boolean isShuffle = false;
     private boolean isRepeat = false;
     private int seekTo = 0;
+    private int totalDuration = 0;
+    private int stopAfterMinutes;
+    private Runnable volumeReductionRunnable;
+    private Handler handler;
     private SongModel songModel = new SongModel();
 
     public SongService() {
@@ -86,6 +92,7 @@ public class SongService extends Service {
                 isShuffle = bundle.getBoolean(Application.IS_SHUFFLE, false);
                 isRepeat = bundle.getBoolean(Application.IS_REPEAT, false);
                 seekTo = bundle.getInt(Application.SEEK_BAR_PROGRESS, 0);
+                stopAfterMinutes = bundle.getInt(Application.STOP_AFTER_MINUTES, 0);
                 song = songs.get(index);
                 Log.e(TAG, "onStartCommand: handle song index:  " + index + " " + song.toString() + "; isShuffle: " + isShuffle + " ; isRepeat: " + isRepeat + "; seek to: " + seekTo);
             }
@@ -131,6 +138,30 @@ public class SongService extends Service {
                 break;
             case Action.ACTION_SEEK_TO:
                 seekTo();
+                break;
+            case Action.ACTION_SLEEP_TIME:
+                long durationMinutes = stopAfterMinutes;
+                AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                long volumeReductionInterval = (durationMinutes - 1) * 60 * 1000;
+                handler = new Handler();
+                volumeReductionRunnable = new Runnable() {
+                    int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                    @Override
+                    public void run() {
+                        if (currentVolume > 0) {
+                            mediaPlayer.setVolume(currentVolume / 100f, currentVolume / 100f);
+                            currentVolume--;
+                            handler.postDelayed(this, volumeReductionInterval);
+                        }
+                    }
+                };
+                handler.postDelayed(volumeReductionRunnable, volumeReductionInterval);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        pause();
+                    }
+                }, stopAfterMinutes * 60 * 1000);
                 break;
             case Action.ACTION_CLOSE:
                 stopSelf();
@@ -284,6 +315,7 @@ public class SongService extends Service {
         bundle.putInt(Application.ACTION_TYPE, action);
         bundle.putBoolean(Application.IS_SHUFFLE, isShuffle);
         bundle.putBoolean(Application.IS_REPEAT, isRepeat);
+        bundle.putInt(Application.STOP_AFTER_MINUTES, stopAfterMinutes);
 
         intent.putExtras(bundle);
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);

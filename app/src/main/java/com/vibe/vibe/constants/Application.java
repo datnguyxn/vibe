@@ -19,5 +19,6 @@ public class Application {
     public static final String SEEK_BAR_PROGRESS = "seekBarProgress";
     public static final String ACTION_TO_SERVICE = "com.vibe.vibe.ACTION_TO_SERVICE";
     public static final String ACTION_TO_ACTIVITY = "com.vibe.vibe.ACTION_TO_ACTIVITY";
+    public static final String STOP_AFTER_MINUTES = "stopAfterMinutes";
 
 }

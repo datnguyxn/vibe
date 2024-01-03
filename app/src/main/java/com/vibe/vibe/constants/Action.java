@@ -15,4 +15,5 @@ public class Action {
     public static final int ACTION_REPEAT = 11;
     public static final int ACTION_SONG_LIKED = 12;
     public static final int ACTION_SEEK_TO = 13;
+    public static final int ACTION_SLEEP_TIME = 14;
 }

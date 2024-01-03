@@ -67,6 +67,8 @@ public class PlayerFragment extends Fragment {
     private boolean isLike = false;
     private boolean isShuffle = false;
     private boolean isRepeat = false;
+    private int totalTime = 0;
+    private int stopAfterMinutes = 0;
     private int index = 0;
     private int seekTo = 0;
     private String id;
@@ -84,10 +86,12 @@ public class PlayerFragment extends Fragment {
                 song = (Song) bundle.getSerializable(Application.CURRENT_SONG);
                 index = bundle.getInt(Application.SONG_INDEX);
                 seekTo = bundle.getInt(Application.SEEK_BAR_PROGRESS, 0);
-                Log.w(TAG, "onReceive456: " + seekTo);
+                Log.w(TAG, "onReceive4565: " + seekTo);
                 isShuffle = bundle.getBoolean(Application.IS_SHUFFLE, false);
                 isRepeat = bundle.getBoolean(Application.IS_REPEAT, false);
                 songs = (ArrayList<Song>) bundle.getSerializable(Application.SONGS_ARG);
+                stopAfterMinutes = bundle.getInt(Application.STOP_AFTER_MINUTES, 0);
+                Log.e(TAG, "onReciver: " + stopAfterMinutes);
                 Log.e(TAG, "onReceive: handle receive: " + action + " isPlaying: " + isPlaying + "; isShuffle: " + isShuffle + "; isRepeat: " + isRepeat + "; seekTo: " + seekTo);
                 handleActionReceive(action);
             }
@@ -129,7 +133,7 @@ public class PlayerFragment extends Fragment {
             song = (Song) bundle.getSerializable(Application.CURRENT_SONG);
             index = bundle.getInt(Application.SONG_INDEX);
             seekTo = bundle.getInt(Application.SEEK_BAR_PROGRESS, 0);
-            Log.w(TAG, "onReceive456: " + seekTo);
+            Log.w(TAG, "onReceive4566: " + seekTo);
             isShuffle = bundle.getBoolean(Application.IS_SHUFFLE, false);
             isRepeat = bundle.getBoolean(Application.IS_REPEAT, false);
             songs = (ArrayList<Song>) bundle.getSerializable(Application.SONGS_ARG);
@@ -160,6 +164,14 @@ public class PlayerFragment extends Fragment {
             bundle.putSerializable(Application.CURRENT_SONG, song);
             bundle.putBoolean("Like", isLike);
             bundle.putString("SFP", "");
+            bundle.putSerializable(Application.SONGS_ARG, songs);
+            bundle.putSerializable(Application.CURRENT_SONG, song);
+            bundle.putInt(Application.SONG_INDEX, index);
+            bundle.putInt(Application.SEEK_BAR_PROGRESS, seekTo);
+            bundle.putBoolean(Application.IN_NOW_PLAYING, true);
+            bundle.putBoolean(Application.IS_PLAYING, isPlaying);
+            bundle.putBoolean(Application.IS_SHUFFLE, isShuffle);
+            bundle.putBoolean(Application.IS_REPEAT, isRepeat);
             moreOptionBottomSheetFragment.setArguments(bundle);
             moreOptionBottomSheetFragment.show(getChildFragmentManager(), moreOptionBottomSheetFragment.getTag());
         });

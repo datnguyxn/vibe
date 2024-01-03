@@ -30,12 +30,14 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.vibe.vibe.R;
+import com.vibe.vibe.constants.Action;
 import com.vibe.vibe.constants.Application;
 import com.vibe.vibe.constants.Schema;
 import com.vibe.vibe.entities.Song;
 import com.vibe.vibe.models.PlaylistModel;
 import com.vibe.vibe.models.SongModel;
 import com.vibe.vibe.models.UserModel;
+import com.vibe.vibe.services.SongService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +63,7 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
     private ImageView ivMorePicture;
     private String[] playlistIds;
     private String[] playlistNames;
-    private TextView tvMoreSong, tvMoreArtist, tvLikeArtist, tvAddToPlaylist, tvDownload, tvShare, tvClose, tvRemoveFromPlaylist;
+    private TextView tvMoreSong, tvMoreArtist, tvLikeArtist, tvAddToPlaylist, tvDownload, tvShare, tvClose, tvRemoveFromPlaylist, tvSleepTimer;
     private final UserModel userModel = new UserModel();
     private final PlaylistModel playlistModel = new PlaylistModel();
     private final SongModel songModel = new SongModel();
@@ -69,6 +71,13 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
     private Song song;
     private String playlistId;
     private boolean isLiked = false;
+    private int stopAfterMinutes = 0;
+    private ArrayList<Song> songs;
+    private boolean isPlaying = false;
+    private boolean isShuffle = false;
+    private boolean isRepeat = false;
+    private int seekTo = 0;
+    private int index = 0;
 
     public MoreOptionBottomSheetFragment() {
         // Required empty public constructor
@@ -125,6 +134,14 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             song = (Song) bundle.getSerializable(Application.CURRENT_SONG);
+            int action = getArguments().getInt(Application.ACTION_TYPE);
+            isPlaying = bundle.getBoolean(Application.IS_PLAYING);
+            index = bundle.getInt(Application.SONG_INDEX);
+            seekTo = bundle.getInt(Application.SEEK_BAR_PROGRESS, 0);
+            Log.w(TAG, "onReceive456: " + seekTo);
+            isShuffle = bundle.getBoolean(Application.IS_SHUFFLE, false);
+            isRepeat = bundle.getBoolean(Application.IS_REPEAT, false);
+            songs = (ArrayList<Song>) bundle.getSerializable(Application.SONGS_ARG);
             Log.d(TAG, "onCreateView: " + song.toString());
             checkSongAddedToFavorite();
             playlistId = bundle.getString("SFP");
@@ -302,6 +319,36 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
             AlertDialog dialog = builder.create();
             dialog.show();
         });
+        tvSleepTimer.setOnClickListener(v -> {
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+            builder.setTitle("Stop audio in");
+            String[] minutes = {"5 minutes", "10 minutes", "15 minutes", "30 minutes", "45 minutes", "1 hour"};
+            builder.setItems(minutes, (dialog, which) -> {
+                String minute = minutes[which];
+                String[] minuteSplit = minute.split(" ");
+                if (minuteSplit[1].equals("hour")) {
+                    stopAfterMinutes = 60;
+                } else {
+                    stopAfterMinutes = Integer.parseInt(minuteSplit[0]);
+                }
+                Log.e(TAG, "onMenuItemClick: " + stopAfterMinutes);
+                Intent intent = new Intent(getContext(), SongService.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(Application.SONGS_ARG, songs);
+                bundle.putSerializable(Application.CURRENT_SONG, song);
+                bundle.putInt(Application.SONG_INDEX, index);
+                bundle.putInt(Application.SEEK_BAR_PROGRESS, seekTo);
+                bundle.putBoolean(Application.IN_NOW_PLAYING, true);
+                bundle.putBoolean(Application.IS_PLAYING, isPlaying);
+                bundle.putBoolean(Application.IS_SHUFFLE, isShuffle);
+                bundle.putBoolean(Application.IS_REPEAT, isRepeat);
+                bundle.putInt(Application.STOP_AFTER_MINUTES, stopAfterMinutes);
+                bundle.putInt(Application.ACTION_TYPE, Action.ACTION_SLEEP_TIME);
+                intent.putExtras(bundle);
+                getContext().startService(intent);
+            });
+            builder.show();
+        });
     }
 
     private void downloadSong() {
@@ -365,6 +412,7 @@ public class MoreOptionBottomSheetFragment extends BottomSheetDialogFragment {
         tvRemoveFromPlaylist = view.findViewById(R.id.tvRemoveFromPlaylist);
         tvDownload = view.findViewById(R.id.tvDownload);
         tvShare = view.findViewById(R.id.tvShare);
+        tvSleepTimer = view.findViewById(R.id.tvSleepTimer);
         tvClose = view.findViewById(R.id.tvClose);
         tvClose.setOnClickListener(v -> dismiss());
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences(Application.SHARED_PREFERENCES_USER, requireContext().MODE_PRIVATE);

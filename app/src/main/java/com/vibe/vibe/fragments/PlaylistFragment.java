@@ -59,7 +59,7 @@ public class PlaylistFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private static final String TAG = SearchFragment.class.getSimpleName();
+    private static final String TAG = PlaylistFragment.class.getSimpleName();
     private ImageView blur_image, playlist_image, imgBackPlaylistToHome;
     private TextView playlist_name, playlist_size;
     private RecyclerView rvplaylist_songs;
@@ -207,29 +207,29 @@ public class PlaylistFragment extends Fragment {
                                                     }
                                                 }
                                             }
-                                           userModel.addConfiguration(uid, Schema.PRIVATE_PLAYLISTS, config, new UserModel.OnAddConfigurationListener() {
-                                               @Override
-                                               public void onAddConfigurationSuccess() {
-                                                   playlistModel.removePlaylistForUser(uid, album.getId(), new PlaylistModel.OnRemovePlaylistListener() {
-                                                       @Override
-                                                       public void onRemovePlaylistSuccess() {
-                                                           Snackbar.make(getView(), "Delete playlist successfully", Snackbar.LENGTH_SHORT).show();
-                                                           LibraryFragment libraryFragment = new LibraryFragment();
-                                                           getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, libraryFragment).commit();
-                                                       }
+                                            userModel.addConfiguration(uid, Schema.PRIVATE_PLAYLISTS, config, new UserModel.OnAddConfigurationListener() {
+                                                @Override
+                                                public void onAddConfigurationSuccess() {
+                                                    playlistModel.removePlaylistForUser(uid, album.getId(), new PlaylistModel.OnRemovePlaylistListener() {
+                                                        @Override
+                                                        public void onRemovePlaylistSuccess() {
+                                                            Snackbar.make(getView(), "Delete playlist successfully", Snackbar.LENGTH_SHORT).show();
+                                                            LibraryFragment libraryFragment = new LibraryFragment();
+                                                            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, libraryFragment).commit();
+                                                        }
 
-                                                       @Override
-                                                       public void onRemovePlaylistFailed() {
-                                                           Snackbar.make(getView(), "Delete playlist failed", Snackbar.LENGTH_SHORT).show();
-                                                       }
-                                                   });
-                                               }
+                                                        @Override
+                                                        public void onRemovePlaylistFailed() {
+                                                            Snackbar.make(getView(), "Delete playlist failed", Snackbar.LENGTH_SHORT).show();
+                                                        }
+                                                    });
+                                                }
 
-                                               @Override
-                                               public void onAddConfigurationFailure(String error) {
-                                                   Log.d(TAG, "onAddConfigurationFailure: " + error);
-                                               }
-                                           });
+                                                @Override
+                                                public void onAddConfigurationFailure(String error) {
+                                                    Log.d(TAG, "onAddConfigurationFailure: " + error);
+                                                }
+                                            });
                                         }
 
                                         @Override
@@ -243,9 +243,8 @@ public class PlaylistFragment extends Fragment {
                                 })
                                 .show();
                         return true;
-                    } else {
-                        return false;
                     }
+                    return false;
                 });
                 popupMenu.show();
             });
@@ -380,6 +379,7 @@ public class PlaylistFragment extends Fragment {
             case Action.ACTION_RESUME:
             case Action.ACTION_PAUSE:
             case Action.ACTION_CLOSE:
+            case Action.ACTION_SLEEP_TIME:
                 updateStatusUI();
                 break;
         }

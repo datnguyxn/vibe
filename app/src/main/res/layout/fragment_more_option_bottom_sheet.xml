@@ -108,6 +108,22 @@
             android:drawablePadding="@dimen/_20dp"/>
 
         <TextView
+            android:id="@+id/tvSleepTimer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Sleep Mode"
+            android:drawableLeft="@drawable/baseline_access_time_24"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvDownload"
+            android:textColor="@color/FlatWhite"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/_30dp"
+            android:layout_marginStart="@dimen/_40dp"
+            android:drawablePadding="@dimen/_20dp"
+            />
+
+        <TextView
             android:id="@+id/tvShare"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -115,7 +131,7 @@
             android:drawableLeft="@drawable/share"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvDownload"
+            app:layout_constraintTop_toBottomOf="@+id/tvSleepTimer"
             android:textColor="@color/FlatWhite"
             android:textStyle="bold"
             android:layout_marginTop="@dimen/_30dp"
